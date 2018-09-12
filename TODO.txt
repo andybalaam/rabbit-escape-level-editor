@@ -20,6 +20,11 @@
 
 + Separate into a different git project
 
+# Display in forum
+
++ Can pass in a level as an argument from JS
+- Integrate into Flarumso when you type a rel in, it displays as a level
+
 # Can edit existing simple levels
 
 - Switch back to previous mode in several cases, instead of going to initial

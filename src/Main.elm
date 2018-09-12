@@ -22,24 +22,18 @@ import WorldParser exposing (parse)
 import WorldTextRender exposing (render)
 
 
-initWorld : World
-initWorld =
+initWorld : String -> World
+initWorld initalWorldText =
     let
         p =
-            WorldParser.parse
-                "Example level"
-                (  "######\n"
-                ++ "#r   #\n"
-                ++ "#  j #\n"
-                ++ "######\n"
-                )
+            WorldParser.parse "" initalWorldText
     in
         case p of
             Ok w ->
                 w
             Err s ->
                 makeWorld
-                    "Unexpected Error"
+                    "Failed to parse provided level"
                     (makeBlockGrid [])
                     []
                     []
@@ -51,9 +45,9 @@ translationPlaceholder x =
     x
 
 
-initModel : Model
-initModel =
-    { world = initWorld
+initModel : String -> Model
+initModel initalWorldText =
+    { world = initWorld initalWorldText
     , uiState =
         { mode = InitialMode
         , block = Nothing
@@ -72,7 +66,7 @@ type alias Flags = String
 
 init : Flags -> ( Model, Cmd msg )
 init flags =
-    (initModel, Cmd.none)
+    (initModel flags, Cmd.none)
 
 
 main =

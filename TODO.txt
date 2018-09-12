@@ -18,7 +18,7 @@
 
 # Separate project
 
-- Separate into a different git project
++ Separate into a different git project
 
 # Can edit existing simple levels
 

@@ -6,6 +6,11 @@ A level editor for [Rabbit Escape](http://artificialworlds.net/rabbit-escape).
 
 [Install Elm](https://guide.elm-lang.org/install.html).
 
+```bash
+make setup
+```
+
+
 ## Test
 
 ```bash

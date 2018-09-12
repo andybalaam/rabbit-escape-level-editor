@@ -1,6 +1,78 @@
 import Browser
-import Html exposing (Html, button, div, text)
-import Html.Events exposing (onClick)
+import Html exposing (Html)
+
+
+
+
+import MetaLines
+import Model exposing (Model, UiMode(..), UiState)
+import Msg exposing (Msg(..))
+import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
+import Update exposing (update)
+import View exposing (view)
+import World exposing
+    ( Block(..)
+    , BlockMaterial(..)
+    , BlockShape(..)
+    , World
+    , makeBlockGrid
+    , makeWorld
+    )
+import WorldParser exposing (parse)
+import WorldTextRender exposing (render)
+
+
+initWorld : World
+initWorld =
+    let
+        p =
+            WorldParser.parse
+                "Example level"
+                (  "######\n"
+                ++ "#r   #\n"
+                ++ "#  j #\n"
+                ++ "######\n"
+                )
+    in
+        case p of
+            Ok w ->
+                w
+            Err s ->
+                makeWorld
+                    "Unexpected Error"
+                    (makeBlockGrid [])
+                    []
+                    []
+                    MetaLines.defaults
+
+
+translationPlaceholder : String -> String
+translationPlaceholder x =
+    x
+
+
+initModel : Model
+initModel =
+    { world = initWorld
+    , uiState =
+        { mode = InitialMode
+        , block = Nothing
+        , rabbit = Just (makeRabbit 0 0 Right)
+        , thing = Nothing
+        , newMetaLines = MetaLines.emptyDiff
+        , newWorld = Nothing
+        }
+    , t = translationPlaceholder
+    , past = []
+    , future = []
+    }
+
+
+type alias Flags = String
+
+init : Flags -> ( Model, Cmd msg )
+init flags =
+    (initModel, Cmd.none)
 
 
 main =
@@ -8,43 +80,5 @@ main =
     { init = init
     , update = update
     , view = view
-    , subscriptions = subscriptions
+    , subscriptions = \(model) -> Sub.none
     }
-
-subscriptions : Model -> Sub msg
-subscriptions model =
-    Sub.none
-
--- MODEL
-
-type alias Flags = String
-type alias Model = Int
-
-init : Flags -> ( Model, Cmd msg )
-init flags =
-  ( 0, Cmd.none )
-
-
--- UPDATE
-
-type Msg = Increment | Decrement
-
-update : Msg -> Model -> ( Model, Cmd msg )
-update msg model =
-  case msg of
-    Increment ->
-      ( model + 1, Cmd.none )
-
-    Decrement ->
-      ( model - 1, Cmd.none )
-
-
--- VIEW
-
-view : Model -> Html Msg
-view model =
-  div []
-    [ button [ onClick Decrement ] [ text "-" ]
-    , div [] [ text (String.fromInt model) ]
-    , button [ onClick Increment ] [ text "+" ]
-    ]

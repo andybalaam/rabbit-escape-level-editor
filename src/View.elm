@@ -1,10 +1,14 @@
 module View exposing (view)
 
+
 import Html exposing
     ( Html
     , div
     )
 import Html.Attributes exposing (id)
+
+
+import Flags exposing (Flags)
 import Model exposing (Model)
 import Msg exposing (Msg)
 import ViewDialog exposing (viewDialog)
@@ -19,6 +23,6 @@ view model =
         ]
         (
             [ (viewToolbar model)
-            , (viewWorkspace model.world)
+            , (viewWorkspace model.flags model.world)
             ] ++ (viewDialog model)
         )

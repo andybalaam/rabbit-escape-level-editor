@@ -47,9 +47,10 @@ translationPlaceholder x =
     x
 
 
-initModel : String -> Model
-initModel initialWorldText =
-    { world = initWorld initialWorldText
+initModel : Flags -> String -> Model
+initModel flags initialWorldText =
+    { flags = flags
+    , world = initWorld initialWorldText
     , uiState =
         { mode = InitialMode
         , block = Nothing
@@ -80,7 +81,7 @@ init flagsJson =
             defaultFlags
             (Json.Decode.decodeValue flagsDecoder flagsJson)
     in
-        (initModel flags.worldText, Cmd.none)
+        (initModel flags flags.worldText, Cmd.none)
 
 
 main =

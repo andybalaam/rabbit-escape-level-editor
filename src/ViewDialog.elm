@@ -1,7 +1,6 @@
 module ViewDialog exposing (viewDialog)
 
 
-import BlockImage exposing (blockImage)
 import Html exposing (Html, button, div, img, input, label, p, text, textarea)
 import Html.Attributes exposing
     ( class
@@ -16,6 +15,10 @@ import Html.Attributes exposing
     , value
     )
 import Html.Events exposing (onClick, onInput)
+
+
+import BlockImage exposing (blockImage)
+import ImagePath exposing (imagePath)
 import MetaLines exposing (MetaValue(..))
 import Model exposing (Model, UiMode(..), UiState)
 import Msg exposing (Msg(..))
@@ -53,7 +56,7 @@ chooseBlockButtons model =
         but block =
             button
                 [ onClick (ChangeBlock block) ]
-                [ img [ src ("images/" ++ (blockImage block)) ] [] ]
+                [ img [ src (imagePath model.flags (blockImage block)) ] [] ]
     in
         { visible =
             True
@@ -79,7 +82,7 @@ chooseRabbitButtons model =
         but rabbit =
             button
                 [ onClick (ChangeRabbit rabbit) ]
-                [ img [ src ("images/" ++ (rabbitImage rabbit)) ] [] ]
+                [ img [ src (imagePath model.flags (rabbitImage rabbit)) ] [] ]
     in
         { visible =
             True
@@ -103,7 +106,7 @@ chooseThingButtons model =
         but thing =
             button
                 [ onClick (ChangeThing thing) ]
-                [ img [ src ("images/" ++ (thingImage thing)) ] [] ]
+                [ img [ src (imagePath model.flags (thingImage thing)) ] [] ]
     in
         { visible =
             True

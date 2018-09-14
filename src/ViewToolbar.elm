@@ -10,6 +10,7 @@ import Html exposing
 import Html.Attributes exposing (class, disabled, id, src)
 import Html.Events exposing (onClick)
 
+import ImagePath exposing (imagePath)
 import Msg exposing (Msg(..))
 import Model exposing (Model, UiMode(..), UiState)
 import RabbitImage exposing (rabbitImage)
@@ -139,7 +140,7 @@ viewButton model def =
           ++ buttonEnabled model def
         )
         [ img
-            [ src ("images/" ++ (buttonImage model.uiState def)) ]
+            [ src (imagePath model.flags (buttonImage model.uiState def)) ]
             []
         ]
 

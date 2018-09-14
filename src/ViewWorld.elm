@@ -6,6 +6,8 @@ import Html.Events exposing (onClick)
 
 
 import BlockImage exposing (blockImage)
+import Flags exposing (Flags)
+import ImagePath exposing (imagePath)
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import Rabbit exposing (Direction(..), Rabbit)
@@ -22,31 +24,31 @@ import World exposing
     )
 
 
-rabbitImg : Rabbit -> Html Msg
-rabbitImg rabbit =
+rabbitImg : Flags -> Rabbit -> Html Msg
+rabbitImg flags rabbit =
     img
-        [ src ("images/" ++ rabbitImage (Just rabbit))
+        [ src (imagePath flags (rabbitImage (Just rabbit)))
         , class "thing"
         ]
         []
 
 
-thingImg : Thing -> Html Msg
-thingImg thing =
+thingImg : Flags -> Thing -> Html Msg
+thingImg flags thing =
     img
-        [ src ("images/" ++ thingImage (Just thing))
+        [ src (imagePath flags (thingImage (Just thing)))
         , class "thing"
         ]
         []
 
 
-blockImg : Block -> Int -> Int -> List (Html Msg)
-blockImg block x y =
+blockImg : Flags -> Block -> Int -> Int -> List (Html Msg)
+blockImg flags block x y =
     case block of
         NoBlock -> []
         _ ->
             [ img
-                [ src ("images/" ++ blockImage block) ]
+                [ src (imagePath flags (blockImage block)) ]
                 []
             ]
 
@@ -67,70 +69,77 @@ buttonAttrs x y =
 
 
 viewBlockContents :
+    Flags ->
     Block ->
     List Rabbit ->
     List Thing ->
     Int ->
     Int ->
     Html Msg
-viewBlockContents block rabbits things x y =
+viewBlockContents flags block rabbits things x y =
         button
             ( [ onClick (LevelClick x y) ] ++ buttonAttrs x y )
-            (  blockImg block x y
-            ++ List.map thingImg things
-            ++ List.map rabbitImg rabbits
+            (  blockImg flags block x y
+            ++ List.map (thingImg flags) things
+            ++ List.map (rabbitImg flags) rabbits
             )
 
 
-addCol : Int -> Int -> List (Html Msg)
-addCol x y =
+addCol : Flags -> Int -> Int -> List (Html Msg)
+addCol flags x y =
     case y of
         0 ->
             [ button
                 ( [ onClick (AddColumn) ] ++ buttonAttrs x y )
-                [ img [ src "images/add_column.svg" ] [] ]
+                [ img [ src (imagePath flags "add_column.svg") ] [] ]
             ]
         1 ->
             [ button
                 ( [ onClick (RemoveColumn) ] ++ buttonAttrs x y )
-                [ img [ src "images/remove_column.svg" ] [] ]
+                [ img [ src (imagePath flags "remove_column.svg") ] [] ]
             ]
         _ ->
             []
 
 
-addRow : Int -> List (Html Msg)
-addRow y =
+addRow : Flags -> Int -> List (Html Msg)
+addRow flags y =
     [ button
         ( [ onClick (AddRow) ] ++ buttonAttrs 0 y )
-        [ img [ src "images/add_row.svg" ] [] ]
+        [ img [ src (imagePath flags "add_row.svg") ] [] ]
     , button
         ( [ onClick (RemoveRow) ] ++ buttonAttrs 1 y )
-        [ img [ src "images/remove_row.svg" ] [] ]
+        [ img [ src (imagePath flags "remove_row.svg") ] [] ]
     ]
 
 
-viewBlock : World -> Int -> Int -> Block -> Html Msg
-viewBlock world y x block =
-    viewBlockContents block (rabbitsAt world x y) (thingsAt world x y) x y
+viewBlock : Flags -> World -> Int -> Int -> Block -> Html Msg
+viewBlock flags world y x block =
+    viewBlockContents
+        flags
+        block
+        (rabbitsAt world x y)
+        (thingsAt world x y)
+        x
+        y
 
 
-viewRow : World -> Int -> List Block -> List (Html Msg)
-viewRow world y blocks =
-       ( List.indexedMap (viewBlock world y) blocks)
-    ++ addCol (List.length blocks) y
+viewRow : Flags -> World -> Int -> List Block -> List (Html Msg)
+viewRow flags world y blocks =
+       ( List.indexedMap (viewBlock flags world y) blocks)
+    ++ addCol flags (List.length blocks) y
 
 
-viewWorld : World -> Html Msg
-viewWorld world =
+viewWorld : Flags -> World -> Html Msg
+viewWorld flags world =
     div
         [ id "level" ]
         (
             ( List.concat
                 (List.indexedMap
-                    (viewRow world)
+                    (viewRow flags world)
                     (World.blocks world)
                 )
             )
-        ++ addRow (List.length (World.blocks world))
+        ++ addRow flags (List.length (World.blocks world))
         )

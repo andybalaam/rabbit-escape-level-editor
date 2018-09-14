@@ -1,6 +1,7 @@
 module Model exposing (Model, UiMode(..), UiState)
 
 
+import Flags exposing (Flags)
 import MetaLines
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Rabbit)
@@ -31,7 +32,8 @@ type alias UiState =
 
 
 type alias Model =
-    { world : World
+    { flags : Flags
+    , world : World
     , uiState : UiState
     , t : String -> String
     , past : List World

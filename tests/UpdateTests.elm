@@ -6,7 +6,9 @@ import Test exposing (describe,test,Test)
 import Expect
 
 
+import Flags exposing (Flags)
 import MetaLines
+import Mode exposing (Mode(..))
 import Model exposing (Model, UiMode(..), UiState)
 import Msg exposing (Msg(..))
 import ParseErr exposing (ParseErr(..))
@@ -687,6 +689,9 @@ parseFixed textLines =
         Ok w ->
             w
 
+blankFlags : Flags
+blankFlags = { worldText = "", mode = Edit, urlPrefix = "" }
+
 
 testActions :
     String ->
@@ -700,7 +705,8 @@ testActions desc (initWorld, initState) msgsAndWorlds =
         parseWorld : (Msg, List String, UiState) -> (Msg, Model)
         parseWorld (msg, lines, state) =
             ( msg
-            , { world = parseFixed lines
+            , { flags = blankFlags
+              , world = parseFixed lines
               , uiState = state
               , t = t
               , past = []
@@ -710,7 +716,8 @@ testActions desc (initWorld, initState) msgsAndWorlds =
 
         initModel : Model
         initModel =
-            { world = parseFixed initWorld
+            { flags = blankFlags
+            , world = parseFixed initWorld
             , uiState = initState
             , t = t
             , past = []

@@ -23,10 +23,10 @@ import WorldTextRender exposing (render)
 
 
 initWorld : String -> World
-initWorld initalWorldText =
+initWorld initialWorldText =
     let
         p =
-            WorldParser.parse "" initalWorldText
+            WorldParser.parse "" initialWorldText
     in
         case p of
             Ok w ->
@@ -46,8 +46,8 @@ translationPlaceholder x =
 
 
 initModel : String -> Model
-initModel initalWorldText =
-    { world = initWorld initalWorldText
+initModel initialWorldText =
+    { world = initWorld initialWorldText
     , uiState =
         { mode = InitialMode
         , block = Nothing

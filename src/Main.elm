@@ -1,10 +1,12 @@
 import Browser
 import Html exposing (Html)
+import Json.Decode
 
 
-
-
+import Flags exposing (Flags)
+import FlagsDecoder exposing (flagsDecoder)
 import MetaLines
+import Mode exposing (Mode(..))
 import Model exposing (Model, UiMode(..), UiState)
 import Msg exposing (Msg(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
@@ -62,11 +64,23 @@ initModel initialWorldText =
     }
 
 
-type alias Flags = String
+defaultFlags : Flags
+defaultFlags =
+    { worldText = "##\n##\n"
+    , mode = View
+    , urlPrefix = ""
+    }
 
-init : Flags -> ( Model, Cmd msg )
-init flags =
-    (initModel flags, Cmd.none)
+
+init : Json.Decode.Value -> ( Model, Cmd msg )
+init flagsJson =
+    let
+        flags : Flags
+        flags = Result.withDefault
+            defaultFlags
+            (Json.Decode.decodeValue flagsDecoder flagsJson)
+    in
+        (initModel flags.worldText, Cmd.none)
 
 
 main =

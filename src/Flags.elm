@@ -8,4 +8,5 @@ type alias Flags =
     { worldText : String
     , mode : Mode
     , urlPrefix : String
+    , id : String
     }

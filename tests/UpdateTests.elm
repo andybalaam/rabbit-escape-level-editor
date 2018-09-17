@@ -690,7 +690,7 @@ parseFixed textLines =
             w
 
 blankFlags : Flags
-blankFlags = { worldText = "", mode = Edit, urlPrefix = "" }
+blankFlags = { worldText = "", mode = Edit, urlPrefix = "", id = "" }
 
 
 testActions :

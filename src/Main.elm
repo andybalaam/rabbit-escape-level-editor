@@ -70,6 +70,7 @@ defaultFlags =
     { worldText = "##\n##\n"
     , mode = View
     , urlPrefix = ""
+    , id = "default123"
     }
 
 

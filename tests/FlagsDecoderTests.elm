@@ -19,15 +19,22 @@ all = Test.concat
             { worldText = "###\n# #\n###\n"
             , mode = View
             , urlPrefix = ""
+            , id = ""
             }
         )
 
     , test "Provided fields are recognised"
         (eq
-            "{\"worldText\": \"#r#\\n###\", \"mode\": \"Edit\", \"urlPrefix\": \"/x/\"}"
+            ( "{\"worldText\": \"#r#\\n###\", " ++
+              "\"mode\": \"Edit\", " ++
+              "\"urlPrefix\": \"/x/\","++
+              "\"id\": \"foo\""++
+              "}"
+            )
             { worldText = "#r#\n###"
             , mode = Edit
             , urlPrefix = "/x/"
+            , id = "foo"
             }
         )
 

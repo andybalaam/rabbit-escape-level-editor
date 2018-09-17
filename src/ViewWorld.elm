@@ -8,6 +8,7 @@ import Html.Events exposing (onClick)
 import BlockImage exposing (blockImage)
 import Flags exposing (Flags)
 import ImagePath exposing (imagePath)
+import Mode exposing (Mode(..))
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import Rabbit exposing (Direction(..), Rabbit)
@@ -53,8 +54,8 @@ blockImg flags block x y =
             ]
 
 
-buttonAttrs : Int -> Int -> List (Html.Attribute Msg)
-buttonAttrs x y =
+gridPosAttrs : Int -> Int -> List (Html.Attribute Msg)
+gridPosAttrs x y =
     let
         sx = String.fromInt (x + 1)
         sy = String.fromInt (y + 1)
@@ -70,19 +71,18 @@ buttonAttrs x y =
 
 viewBlockContents :
     Flags ->
-    Block ->
-    List Rabbit ->
-    List Thing ->
+    List (Html Msg) ->
     Int ->
     Int ->
     Html Msg
-viewBlockContents flags block rabbits things x y =
-        button
-            ( [ onClick (LevelClick x y) ] ++ buttonAttrs x y )
-            (  blockImg flags block x y
-            ++ List.map (thingImg flags) things
-            ++ List.map (rabbitImg flags) rabbits
-            )
+viewBlockContents flags images x y =
+    case flags.mode of
+        Edit ->
+            button
+                ( [ onClick (LevelClick x y) ] ++ gridPosAttrs x y )
+                images
+        View ->
+            div (gridPosAttrs x y) images
 
 
 addCol : Flags -> Int -> Int -> List (Html Msg)
@@ -90,12 +90,12 @@ addCol flags x y =
     case y of
         0 ->
             [ button
-                ( [ onClick (AddColumn) ] ++ buttonAttrs x y )
+                ( [ onClick (AddColumn) ] ++ gridPosAttrs x y )
                 [ img [ src (imagePath flags "add_column.svg") ] [] ]
             ]
         1 ->
             [ button
-                ( [ onClick (RemoveColumn) ] ++ buttonAttrs x y )
+                ( [ onClick (RemoveColumn) ] ++ gridPosAttrs x y )
                 [ img [ src (imagePath flags "remove_column.svg") ] [] ]
             ]
         _ ->
@@ -105,10 +105,10 @@ addCol flags x y =
 addRow : Flags -> Int -> List (Html Msg)
 addRow flags y =
     [ button
-        ( [ onClick (AddRow) ] ++ buttonAttrs 0 y )
+        ( [ onClick (AddRow) ] ++ gridPosAttrs 0 y )
         [ img [ src (imagePath flags "add_row.svg") ] [] ]
     , button
-        ( [ onClick (RemoveRow) ] ++ buttonAttrs 1 y )
+        ( [ onClick (RemoveRow) ] ++ gridPosAttrs 1 y )
         [ img [ src (imagePath flags "remove_row.svg") ] [] ]
     ]
 
@@ -117,9 +117,10 @@ viewBlock : Flags -> World -> Int -> Int -> Block -> Html Msg
 viewBlock flags world y x block =
     viewBlockContents
         flags
-        block
-        (rabbitsAt world x y)
-        (thingsAt world x y)
+        (  blockImg flags block x y
+        ++ List.map (thingImg flags) (thingsAt world x y)
+        ++ List.map (rabbitImg flags) (rabbitsAt world x y)
+        )
         x
         y
 

@@ -1,4 +1,4 @@
-html, body, #main
+html, body, .level-editor-main
 {
     height: 100%;
     margin: 0em;
@@ -133,12 +133,24 @@ html
     height: 55px;
 }
 
+#level div
+{
+    position: relative;
+    border: none;
+    background: none;
+    overflow: hidden;
+    padding: 0em;
+    margin: 0em;
+    width: 55px;
+    height: 55px;
+}
+
 #level button:focus
 {
     outline: 0.05em dotted #000;
 }
 
-#level button img
+#level button,div img
 {
     width: 55px;
     height: 55px;

@@ -150,7 +150,7 @@ html
     outline: 0.05em dotted #000;
 }
 
-#level button,div img
+#level div img, #level button img
 {
     width: 55px;
     height: 55px;

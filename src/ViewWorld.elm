@@ -87,30 +87,36 @@ viewBlockContents flags images x y =
 
 addCol : Flags -> Int -> Int -> List (Html Msg)
 addCol flags x y =
-    case y of
-        0 ->
-            [ button
-                ( [ onClick (AddColumn) ] ++ gridPosAttrs x y )
-                [ img [ src (imagePath flags "add_column.svg") ] [] ]
-            ]
-        1 ->
-            [ button
-                ( [ onClick (RemoveColumn) ] ++ gridPosAttrs x y )
-                [ img [ src (imagePath flags "remove_column.svg") ] [] ]
-            ]
-        _ ->
-            []
+    if flags.mode == View then
+        []
+    else
+        case y of
+            0 ->
+                [ button
+                    ( [ onClick (AddColumn) ] ++ gridPosAttrs x y )
+                    [ img [ src (imagePath flags "add_column.svg") ] [] ]
+                ]
+            1 ->
+                [ button
+                    ( [ onClick (RemoveColumn) ] ++ gridPosAttrs x y )
+                    [ img [ src (imagePath flags "remove_column.svg") ] [] ]
+                ]
+            _ ->
+                []
 
 
 addRow : Flags -> Int -> List (Html Msg)
 addRow flags y =
-    [ button
-        ( [ onClick (AddRow) ] ++ gridPosAttrs 0 y )
-        [ img [ src (imagePath flags "add_row.svg") ] [] ]
-    , button
-        ( [ onClick (RemoveRow) ] ++ gridPosAttrs 1 y )
-        [ img [ src (imagePath flags "remove_row.svg") ] [] ]
-    ]
+    if flags.mode == View then
+        []
+    else
+        [ button
+            ( [ onClick (AddRow) ] ++ gridPosAttrs 0 y )
+            [ img [ src (imagePath flags "add_row.svg") ] [] ]
+        , button
+            ( [ onClick (RemoveRow) ] ++ gridPosAttrs 1 y )
+            [ img [ src (imagePath flags "remove_row.svg") ] [] ]
+        ]
 
 
 viewBlock : Flags -> World -> Int -> Int -> Block -> Html Msg

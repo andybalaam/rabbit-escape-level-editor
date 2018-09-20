@@ -27,7 +27,7 @@ defaultWorldText = "###\n# #\n###\n"
 flagsDecoder : D.Decoder Flags
 flagsDecoder =
     D.map4 Flags
-        (D.oneOf [(D.field "worldText" D.string), D.succeed defaultWorldText])
-        (D.oneOf [(D.field "mode" modeDecoder), D.succeed View])
-        (D.oneOf [(D.field "urlPrefix" D.string), D.succeed ""])
-        (D.oneOf [(D.field "id" D.string), D.succeed ""])
+        (D.field "worldText" D.string)
+        (D.field "mode" modeDecoder)
+        (D.field "urlPrefix" D.string)
+        (D.field "id" D.string)

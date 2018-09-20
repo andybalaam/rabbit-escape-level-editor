@@ -26,8 +26,7 @@ defaultWorldText = "###\n# #\n###\n"
 
 flagsDecoder : D.Decoder Flags
 flagsDecoder =
-    D.map4 Flags
+    D.map3 Flags
         (D.field "worldText" D.string)
         (D.field "mode" modeDecoder)
         (D.field "urlPrefix" D.string)
-        (D.field "id" D.string)

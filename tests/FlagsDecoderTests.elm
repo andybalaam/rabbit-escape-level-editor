@@ -13,28 +13,19 @@ import Mode exposing (..)
 
 all : Test
 all = Test.concat
-    [ test "Empty object produces defaults"
-        (eq
-            "{}"
-            { worldText = "###\n# #\n###\n"
-            , mode = View
-            , urlPrefix = ""
-            , id = ""
-            }
-        )
+    [ test "Empty object is an error"
+        (assert_parsing_error "{}")
 
     , test "Provided fields are recognised"
         (eq
             ( "{\"worldText\": \"#r#\\n###\", " ++
               "\"mode\": \"Edit\", " ++
-              "\"urlPrefix\": \"/x/\","++
-              "\"id\": \"foo\""++
+              "\"urlPrefix\": \"/x/\""++
               "}"
             )
             { worldText = "#r#\n###"
             , mode = Edit
             , urlPrefix = "/x/"
-            , id = "foo"
             }
         )
 

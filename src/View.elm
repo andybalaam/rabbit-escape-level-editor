@@ -5,7 +5,7 @@ import Html exposing
     ( Html
     , div
     )
-import Html.Attributes exposing (class, id)
+import Html.Attributes exposing (class)
 
 
 import Flags exposing (Flags)
@@ -20,8 +20,7 @@ import ViewWorkspace exposing (viewWorkspace)
 view : Model -> Html Msg
 view model =
     div
-        [ id model.flags.id
-        , class "level-editor-main"
+        [ class "level-editor-main"
         ]
         ( case model.flags.mode of
             Edit ->

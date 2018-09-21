@@ -4,6 +4,7 @@ module View exposing (view)
 import Html exposing
     ( Html
     , div
+    , text
     )
 import Html.Attributes exposing (class)
 
@@ -15,6 +16,7 @@ import Msg exposing (Msg)
 import ViewDialog exposing (viewDialog)
 import ViewToolbar exposing (viewToolbar)
 import ViewWorkspace exposing (viewWorkspace)
+import WorldParser exposing (parseErrToString)
 
 
 view : Model -> Html Msg
@@ -22,13 +24,23 @@ view model =
     div
         [ class "level-editor-main"
         ]
-        ( case model.flags.mode of
-            Edit ->
-                (
-                    [ (viewToolbar model)
-                    , (viewWorkspace model.flags model.world)
-                    ] ++ (viewDialog model)
+        ( case model.world of
+            Ok w ->
+                ( case model.flags.mode of
+                    Edit ->
+                        (
+                            [ (viewToolbar model)
+                            , (viewWorkspace model.flags w)
+                            ] ++ (viewDialog model w)
+                        )
+                    View ->
+                        [ viewWorkspace model.flags w ]
                 )
-            View ->
-                [ viewWorkspace model.flags model.world ]
+            Err e ->
+                [
+                    ( div
+                        [ class "viewParseErr" ]
+                        [ text (parseErrToString e) ]
+                    )
+                ]
         )

@@ -164,6 +164,14 @@ html
     z-index: 1;
 }
 
+.viewParseErr
+{
+    background-color: black;
+    color: red;
+    font-family: Ubuntu Mono, Courier New, monospace;
+    padding: 0.8em;
+}
+
 #dialogBackground
 {
     position: fixed;

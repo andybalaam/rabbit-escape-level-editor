@@ -24,24 +24,6 @@ import WorldParser exposing (parse)
 import WorldTextRender exposing (render)
 
 
-initWorld : String -> World
-initWorld initialWorldText =
-    let
-        p =
-            WorldParser.parse "" initialWorldText
-    in
-        case p of
-            Ok w ->
-                w
-            Err s ->
-                makeWorld
-                    "Failed to parse provided level"
-                    (makeBlockGrid [])
-                    []
-                    []
-                    MetaLines.defaults
-
-
 translationPlaceholder : String -> String
 translationPlaceholder x =
     x
@@ -50,7 +32,7 @@ translationPlaceholder x =
 initModel : Flags -> String -> Model
 initModel flags initialWorldText =
     { flags = flags
-    , world = initWorld initialWorldText
+    , world = WorldParser.parse "" initialWorldText
     , uiState =
         { mode = InitialMode
         , block = Nothing

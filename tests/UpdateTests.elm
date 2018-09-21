@@ -676,18 +676,10 @@ all =
         ]
 
 
-parseFixed : List String -> World
-parseFixed textLines =
-    case parse "" (String.join "\n" textLines) of
-        Err e ->
-            makeWorld
-                "Parsing failed!"
-                (makeBlockGrid [])
-                []
-                []
-                MetaLines.defaults
-        Ok w ->
-            w
+parseLines : List String -> Result ParseErr World
+parseLines textLines =
+    parse "" (String.join "\n" textLines)
+
 
 blankFlags : Flags
 blankFlags = { worldText = "", mode = Edit, urlPrefix = "" }
@@ -706,7 +698,7 @@ testActions desc (initWorld, initState) msgsAndWorlds =
         parseWorld (msg, lines, state) =
             ( msg
             , { flags = blankFlags
-              , world = parseFixed lines
+              , world = parseLines lines
               , uiState = state
               , t = t
               , past = []
@@ -717,7 +709,7 @@ testActions desc (initWorld, initState) msgsAndWorlds =
         initModel : Model
         initModel =
             { flags = blankFlags
-            , world = parseFixed initWorld
+            , world = parseLines initWorld
             , uiState = initState
             , t = t
             , past = []

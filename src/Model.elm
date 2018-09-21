@@ -33,7 +33,7 @@ type alias UiState =
 
 type alias Model =
     { flags : Flags
-    , world : World
+    , world : Result ParseErr World
     , uiState : UiState
     , t : String -> String
     , past : List World

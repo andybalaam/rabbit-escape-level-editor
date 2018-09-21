@@ -83,7 +83,14 @@ normalUpdate msg model =
         if updatedModel.world == model.world then
             updatedModel
         else
-            { updatedModel | past = model.world :: model.past, future = [] }
+            case model.world of
+                Err _ ->
+                    updatedModel
+                Ok w ->
+                    { updatedModel
+                    | past = w :: model.past
+                    , future = []
+                    }
 
 
 updateCodeInput : Model -> String -> Model
@@ -101,22 +108,26 @@ updateCodeInput model text =
 
 updateChangeCode : Model -> Model
 updateChangeCode model =
-    let
-        uiState = model.uiState
-        world =
-            uiState.newWorld
-                |> Maybe.withDefault ("", Ok model.world)
-                |> Tuple.second
-                |> Result.withDefault model.world
-    in
-        { model
-        | world = world
-        , uiState =
-            { uiState
-            | newWorld = Nothing
-            , mode = InitialMode
-            }
-        }
+    case model.world of
+        Err _ ->
+            model
+        Ok w ->
+            let
+                uiState = model.uiState
+                world =
+                    uiState.newWorld
+                        |> Maybe.withDefault ("", Ok w)
+                        |> Tuple.second
+                        |> Result.withDefault w
+            in
+                { model
+                | world = Ok world
+                , uiState =
+                    { uiState
+                    | newWorld = Nothing
+                    , mode = InitialMode
+                    }
+                }
 
 
 updateDetailsInput : Model -> String -> String -> Model
@@ -134,22 +145,28 @@ updateDetailsInput model name value =
 
 updateChangeDetails : Model -> Model
 updateChangeDetails model =
-    let
-        uiState = model.uiState
-        world = model.world
-    in
-        { model
-        | world =
-            { world
-            | metaLines =
-                MetaLines.applyDiff uiState.newMetaLines world.metaLines
-            }
-        , uiState =
-            { uiState
-            | mode = InitialMode
-            , newMetaLines = MetaLines.emptyDiff
-            }
-        }
+    case model.world of
+        Err _ ->
+            model
+        Ok w ->
+            let
+                uiState = model.uiState
+            in
+                { model
+                | world =
+                    Ok
+                        { w
+                        | metaLines =
+                            MetaLines.applyDiff
+                                uiState.newMetaLines
+                                w.metaLines
+                        }
+                , uiState =
+                    { uiState
+                    | mode = InitialMode
+                    , newMetaLines = MetaLines.emptyDiff
+                    }
+                }
 
 
 updateUndo : Model -> Model
@@ -158,9 +175,12 @@ updateUndo model =
         [] -> model
         recent :: others ->
             { model
-            | world = recent
+            | world = Ok recent
             , past = others
-            , future = model.world :: model.future
+            , future =
+                case model.world of
+                    Ok w -> w :: model.future
+                    _ -> model.future
             }
 
 
@@ -170,9 +190,12 @@ updateRedo model =
         [] -> model
         recent :: others ->
             { model
-            | world = recent
+            | world = Ok recent
             , future = others
-            , past = model.world :: model.past
+            , past =
+                case model.world of
+                    Ok w -> w :: model.past
+                    _ -> model.past
             }
 
 
@@ -218,15 +241,25 @@ updateChangeThing model thing =
         }
 
 
+-- Use the supplied function to update this Model's world,
+-- unless this model has an invalid world, in which case
+-- do nothing.
+updateModelWorld : Model -> (World -> World) -> Model
+updateModelWorld model fn =
+    case model.world of
+        Ok w -> {model | world = Ok (fn w)}
+        _ -> model
+
+
 updateLevelClickRabbit : Model -> Int -> Int -> Model
 updateLevelClickRabbit model x y =
-    { model
-    | world = updateLevelClickRabbitWorld model.uiState.rabbit model.world x y
-    }
+    updateModelWorld
+        model
+        (updateLevelClickRabbitWorld model.uiState.rabbit x y)
 
 
-updateLevelClickRabbitWorld : Maybe Rabbit -> World -> Int -> Int -> World
-updateLevelClickRabbitWorld newRabbit world x y =
+updateLevelClickRabbitWorld : Maybe Rabbit -> Int -> Int -> World -> World
+updateLevelClickRabbitWorld newRabbit x y world =
     let
         rabbits =
             case newRabbit of
@@ -247,18 +280,16 @@ updateLevelClickRabbitWorld newRabbit world x y =
 
 updateLevelClickThing : Model -> Int -> Int -> Model
 updateLevelClickThing model x y =
-    { model
-    | world = updateLevelClickThingWorld model.uiState.thing model.world x y
-    }
+    updateModelWorld model (updateLevelClickThingWorld model.uiState.thing x y)
 
 
 updateLevelClickThingWorld :
     Maybe (Maybe Thing) ->
+    Int ->
+    Int ->
     World ->
-    Int ->
-    Int ->
     World
-updateLevelClickThingWorld maybeNewThing world x y =
+updateLevelClickThingWorld maybeNewThing x y world =
     let
         newThing : Maybe Thing
         newThing =
@@ -286,13 +317,11 @@ updateLevelClickThingWorld maybeNewThing world x y =
 
 updateLevelClickBlock : Model -> Int -> Int -> Model
 updateLevelClickBlock model x y =
-    { model
-    | world = updateLevelClickBlockWorld model.uiState.block model.world x y
-    }
+    updateModelWorld model (updateLevelClickBlockWorld model.uiState.block x y)
 
 
-updateLevelClickBlockWorld : Maybe Block -> World -> Int -> Int -> World
-updateLevelClickBlockWorld newBlock world x y =
+updateLevelClickBlockWorld : Maybe Block -> Int -> Int -> World -> World
+updateLevelClickBlockWorld newBlock x y world =
     makeWorld
         world.comment
         (makeBlockGrid
@@ -327,7 +356,10 @@ updateChangeMode model mode =
         uiState = model.uiState
         m =
             case mode of
-                CodeMode _ -> CodeMode (WorldTextRender.render model.world)
+                CodeMode _ ->
+                    case model.world of
+                        Ok w -> CodeMode (WorldTextRender.render w)
+                        _ -> mode
                 _ -> mode
         newMetaLines =
             case mode of
@@ -352,23 +384,34 @@ updateChangeMode model mode =
 
 updateAddColumn : Model -> Model
 updateAddColumn model =
-    { model
-    | world =
-        makeWorld
-            model.world.comment
-            ( makeBlockGrid
-                (List.map (\r -> r ++ [NoBlock]) (blocks model.world))
-            )
-            model.world.rabbits
-            model.world.things
-            model.world.metaLines
-    }
+    case model.world of
+        Err _ ->
+            model
+        Ok w ->
+            { model
+            | world =
+                Ok
+                    ( makeWorld
+                        w.comment
+                        ( makeBlockGrid
+                            (List.map (\r -> r ++ [NoBlock]) (blocks w))
+                        )
+                        w.rabbits
+                        w.things
+                        w.metaLines
+                    )
+            }
 
 
 updateRemoveColumn : Model -> Model
 updateRemoveColumn model =
+    updateModelWorld model updateWorldRemoveColumn
+
+
+updateWorldRemoveColumn : World -> World
+updateWorldRemoveColumn world =
     let
-        bls = blocks model.world
+        bls = blocks world
         cols =
             case bls of
                 [] -> 3
@@ -383,45 +426,52 @@ updateRemoveColumn model =
             let (x, _) = Thing.pos thing in
                 x /= cols - 1
     in
-        { model
-        | world =
-            makeWorld
-                model.world.comment
-                ( makeBlockGrid
-                    (List.map (\r -> List.take ((List.length r) - 1) r) bls)
+        makeWorld
+            world.comment
+            ( makeBlockGrid
+                ( List.map
+                    (\r -> List.take ((List.length r) - 1) r)
+                    bls
                 )
-                ( List.filter lastColRabbit model.world.rabbits )
-                ( List.filter lastColThing model.world.things )
-                model.world.metaLines
-        }
+            )
+            ( List.filter lastColRabbit world.rabbits )
+            ( List.filter lastColThing world.things )
+            world.metaLines
 
 
 updateAddRow : Model -> Model
 updateAddRow model =
+    updateModelWorld model updateWorldAddRow
+
+
+updateWorldAddRow : World -> World
+updateWorldAddRow world =
     let
-        bls = blocks model.world
+        bls = blocks world
         cols =
             case bls of
                 [] -> 3
                 h :: _ -> List.length h
     in
-        { model
-        | world =
-            makeWorld
-                model.world.comment
-                ( makeBlockGrid
-                    (blocks model.world ++ [List.repeat cols NoBlock])
-                )
-                model.world.rabbits
-                model.world.things
-                model.world.metaLines
-        }
+        makeWorld
+            world.comment
+            ( makeBlockGrid
+                (blocks world ++ [List.repeat cols NoBlock])
+            )
+            world.rabbits
+            world.things
+            world.metaLines
 
 
 updateRemoveRow : Model -> Model
 updateRemoveRow model =
+    updateModelWorld model updateWorldRemoveRow
+
+
+updateWorldRemoveRow : World -> World
+updateWorldRemoveRow world =
     let
-        bls = blocks model.world
+        bls = blocks world
         rows = List.length bls
 
         lastRowRabbit : Rabbit -> Bool
@@ -433,12 +483,9 @@ updateRemoveRow model =
             let (_, y) = Thing.pos thing in
                 y /= rows - 1
     in
-        { model
-        | world =
-            makeWorld
-                model.world.comment
-                ( makeBlockGrid (List.take (rows - 1) bls) )
-                ( List.filter lastRowRabbit model.world.rabbits )
-                ( List.filter lastRowThing model.world.things )
-                model.world.metaLines
-        }
+        makeWorld
+            world.comment
+            ( makeBlockGrid (List.take (rows - 1) bls) )
+            ( List.filter lastRowRabbit world.rabbits )
+            ( List.filter lastRowThing world.things )
+            world.metaLines

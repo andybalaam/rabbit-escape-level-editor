@@ -22,7 +22,7 @@ import ImagePath exposing (imagePath)
 import MetaLines exposing (MetaValue(..))
 import Model exposing (Model, UiMode(..), UiState)
 import Msg exposing (Msg(..))
-import World exposing (Block(..), BlockMaterial(..), BlockShape(..))
+import World exposing (Block(..), BlockMaterial(..), BlockShape(..), World)
 import WorldParser exposing (parseErrToString)
 import Rabbit exposing
     ( Direction(..)
@@ -129,12 +129,12 @@ chooseThingButtons model =
         }
 
 
-codeText : Model -> String -> Contents
-codeText model initialCode =
+codeText : Model -> World -> String -> Contents
+codeText model world initialCode =
     let
         (code, parsed) =
             case model.uiState.newWorld of
-                Nothing -> (initialCode, Ok model.world)
+                Nothing -> (initialCode, Ok world)
                 Just x -> x
 
         (parseError, canUpdate) =
@@ -225,8 +225,8 @@ metaLineBoxes diff (name, defVal) =
         ]
 
 
-modifyDetailsControls : Model -> Contents
-modifyDetailsControls model =
+modifyDetailsControls : Model -> World-> Contents
+modifyDetailsControls model world =
     let
         canUpdate : Bool
         canUpdate = MetaLines.allOk model.uiState.newMetaLines
@@ -235,7 +235,7 @@ modifyDetailsControls model =
         boxes =
             List.map
                 (metaLineBoxes model.uiState.newMetaLines)
-                (MetaLines.toStringList model.world.metaLines)
+                (MetaLines.toStringList world.metaLines)
     in
         { visible =
             True
@@ -302,14 +302,14 @@ drawDialog contents =
         ]
 
 
-viewDialog : Model -> List (Html Msg)
-viewDialog model =
+viewDialog : Model -> World -> List (Html Msg)
+viewDialog model world =
     drawDialog
         ( case model.uiState.mode of
             ChooseBlockMode   -> chooseBlockButtons model
             ChooseThingMode   -> chooseThingButtons model
             ChooseRabbitMode  -> chooseRabbitButtons model
-            CodeMode code     -> codeText model code
-            ModifyDetailsMode -> modifyDetailsControls model
+            CodeMode code     -> codeText model world code
+            ModifyDetailsMode -> modifyDetailsControls model world
             other             -> invisible
         )

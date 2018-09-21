@@ -121,19 +121,7 @@ html
     grid-template-rows: repeat(auto-fill, 55px);
 }
 
-#level button
-{
-    position: relative;
-    border: none;
-    background: none;
-    overflow: hidden;
-    padding: 0em;
-    margin: 0em;
-    width: 55px;
-    height: 55px;
-}
-
-#level div
+#level button, #level div
 {
     position: relative;
     border: none;
@@ -150,7 +138,7 @@ html
     outline: 0.05em dotted #000;
 }
 
-#level div img, #level button img
+#level button img, #level div img
 {
     width: 55px;
     height: 55px;
@@ -159,7 +147,7 @@ html
     top: 0em;
 }
 
-#level button img.thing
+#level button img.thing, #level div img.thing
 {
     z-index: 1;
 }

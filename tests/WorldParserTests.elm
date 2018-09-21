@@ -53,6 +53,8 @@ all =
         , test "Parse world with blocks" parseWorldWithBlocks
         , test "Parse world with rabbits" parseWorldWithRabbits
         , test "Parse world with things" parseWorldWithThings
+        , test "Parse bad world (long line)" parseBadWorldLongLine
+        , test "Parse bad world (bad char)" parseBadWorldBadChar
         , test "Parse overlapping rabbits" parseOverlappingRabbits
         , test "Parse multiple stars" parseMultipleStars
         ]
@@ -67,6 +69,14 @@ okAndEqual actual expected =
         case actual of
             Ok value -> Expect.equal value expected
             Err error -> Expect.fail ( parseErrToString error )
+
+
+notOkAndEqual : Result ParseErr a -> String -> () -> Expect.Expectation
+notOkAndEqual actual expected =
+    \() ->
+        case actual of
+            Ok _ -> Expect.fail "Expected a parse error!"
+            Err error -> Expect.equal ( parseErrToString error ) expected
 
 
 parseLines : String -> List String -> Result ParseErr World
@@ -135,7 +145,7 @@ toCharItemCases =
                 desc
                 ( \() ->
                     Expect.equal
-                        ( toCharItem gridPos pos.row pos.col char )
+                        ( toCharItem gridPos pos.row pos.row pos.col char )
                         ( exp )
                 )
     in
@@ -144,11 +154,11 @@ toCharItemCases =
             , t "Flat metal"    n pos36 'M' ( Ok (BlockChar pos36 fltMetl ) )
             , t "Right rabbit"  n pos14 'r' ( Ok (RabbitChar pos14 rabr14 ) )
             , t "Left rabbit"   n pos36 'j' ( Ok (RabbitChar pos36 rabl36 ) )
-            , t "Star"          n pos14 '*' ( Ok ( StarChar pos14 ) )
+            , t "Star"          n pos14 '*' ( Ok ( StarChar pos14 pos14) )
             , t "Unknown" n pos14 '>' ( Err ( UnrecognisedChar pos14 '>' ) )
 
             , t "Rabbit at a different position"
-               (Just pos36) pos14 'j' ( Ok (RabbitChar pos14 rabl36 ) )
+               (Just pos36) pos14 'j' ( Ok (RabbitChar pos36 rabl36 ) )
             ]
 
 
@@ -168,7 +178,7 @@ mergeNewCharIntoItemsCases =
         blcCh = BlockChar pos24 blc
         rabCh = RabbitChar rabPos rab
         ra2Ch = RabbitChar ra2Pos ra2
-        staCh = StarChar staPos
+        staCh = StarChar staPos staPos
         err = Err ( TwoBlocksInOneStarPoint pos36 '#' '#')
         t desc act exp = test desc (\() -> Expect.equal act exp)
     in
@@ -269,7 +279,7 @@ integrateSquareCases =
         rab25 = (makeRabbit 2 5 Right)
         rab34 = (makeRabbit 3 4 Right)
         rabCh25 = RabbitChar pos25 rab25
-        star34 = StarChar pos34
+        star34 = StarChar pos34 pos34
         remainingStarLines =
             [ StarLine 9 (String.toList "rrj")
             ]
@@ -317,73 +327,69 @@ integrateLineCases =
         rabr22 = makeRabbit 2 2 Right
         chErth = BlockChar pos11 fltErth
         chRabb = RabbitChar pos11 rabl11
-        t desc act exp = test desc (\() -> Expect.equal act exp)
+        t desc act expLines expStarLines =
+            test desc (
+                \() ->
+                    Expect.equal
+                        act
+                        (Ok ({items=expLines, physicalRow=1}, expStarLines))
+            )
+        tbad desc act exp = test desc (\() -> Expect.equal act (Err exp))
     in
         describe "integrateLine"
             [ t "Non-stars are left alone"
                 (integrateLine [chErth, chRabb, chErth] starLines)
-                ( Ok
-                    (
-                        [ { block=fltErth, rabbits=[], things=[] }
-                        , { block=NoBlock, rabbits=[rabl11], things=[] }
-                        , { block=fltErth, rabbits=[], things=[] }
-                        ]
-                    , starLines
-                    )
-                )
+                [ { block=fltErth, rabbits=[], things=[] }
+                , { block=NoBlock, rabbits=[rabl11], things=[] }
+                , { block=fltErth, rabbits=[], things=[] }
+                ]
+                starLines
 
             , t "Star gets integrated"
-                (integrateLine [StarChar pos01, chRabb, chErth] starLines)
-                ( Ok
-                    (
-                        [ { block=NoBlock
-                          , rabbits=[rabr01, rabr01, rabl01]
-                          , things=[]
-                          }
-                        , { block=NoBlock, rabbits=[rabl11], things=[] }
-                        , { block=fltErth, rabbits=[], things=[] }
-                        ]
-                    , [starLine2, starLine3]
-                    )
-                )
+                (integrateLine [StarChar pos01 pos01, chRabb, chErth] starLines)
+                [ { block=NoBlock
+                  , rabbits=[rabr01, rabr01, rabl01]
+                  , things=[]
+                  }
+                , { block=NoBlock, rabbits=[rabl11], things=[] }
+                , { block=fltErth, rabbits=[], things=[] }
+                ]
+                [starLine2, starLine3]
 
             , t "Multiple stars get integrated"
                 (integrateLine
-                    [StarChar pos01, StarChar pos11, StarChar pos21]
+                    [ StarChar pos01 pos01
+                    , StarChar pos11 pos11
+                    , StarChar pos21 pos21
+                    ]
                     starLines
                 )
-                ( Ok
-                    (
-                        [ { block=NoBlock
-                          , rabbits=[rabr01, rabr01, rabl01]
-                          , things=[]
-                          }
-                        , { block=fltMetl, rabbits=[rabl11], things=[] }
-                        , { block=fltErth
-                          , rabbits=[rabr21, rabl21]
-                          , things=[]
-                          }
-                        ]
-                    , []
-                    )
-                )
+                [ { block=NoBlock
+                  , rabbits=[rabr01, rabr01, rabl01]
+                  , things=[]
+                  }
+                , { block=fltMetl, rabbits=[rabl11], things=[] }
+                , { block=fltErth
+                  , rabbits=[rabr21, rabl21]
+                  , things=[]
+                  }
+                ]
+                []
 
-            , t "Bad star produces an error"
+            , tbad "Bad star produces an error"
                 (integrateLine
-                    [StarChar pos01, chErth, chErth]
+                    [StarChar pos01 pos01, chErth, chErth]
                     [StarLine 10 (String.toList "MM")] -- two blocks
                 )
-                ( Err
-                    ( TwoBlocksInOneStarPoint { row = 10, col = 4 } 'M' 'M' )
-                )
+                ( TwoBlocksInOneStarPoint { row = 10, col = 4 } 'M' 'M' )
             ]
 
 
 integrateLinesCases : Test
 integrateLinesCases =
     let
-        chErth = BlockChar pos11 fltErth
         pos10 = { row = 0, col = 1 }
+        chErth = BlockChar pos10 fltErth
         rabl10 = makeRabbit 1 0 Left
         chRabb10 = RabbitChar pos10 rabl10
         pos01 = { row = 1, col = 0 }
@@ -407,39 +413,52 @@ integrateLinesCases =
         starLine5 = StarLine 14 (String.toList "#rj")
         starLines = [starLine1, starLine2, starLine3, starLine4, starLine5]
         t desc act exp = test desc (\() -> Expect.equal act exp)
+        itRow physicalRow items = {physicalRow=physicalRow, items=items}
     in
         describe "integrateLines"
             [ t "Multiple lines"
                 (integrateLines
                     [ [chErth, chRabb10, chErth]
-                    , [StarChar pos01, StarChar pos11, StarChar pos21]
-                    , [StarChar pos02, chRabb12, chErth]
+                    , [ StarChar pos01 pos01
+                      , StarChar pos11 pos11
+                      , StarChar pos21 pos21
+                      ]
+                    , [ StarChar pos02 pos02
+                      , chRabb12
+                      , chErth
+                      ]
                     ]
                     starLines
                 )
                 ( Ok
                     (
-                        [ [ { block=fltErth, rabbits=[], things=[] }
-                          , { block=NoBlock, rabbits=[rabl10], things=[] }
-                          , { block=fltErth, rabbits=[], things=[] }
-                          ]
-                        , [ { block=NoBlock
-                            , rabbits=[rabr01, rabr01, rabl01]
-                            , things=[]
-                            }
-                          , { block=fltMetl, rabbits=[rabl11], things=[] }
-                          , { block=fltErth
-                            , rabbits=[rabr21, rabl21]
-                            , things=[]
-                            }
-                          ]
-                        , [ { block=fltErth
-                            , rabbits=[rabr02, rabl02]
-                            , things=[]
-                            }
-                          , { block=NoBlock, rabbits=[rabr12], things=[] }
-                          , { block=fltErth, rabbits=[], things=[] }
-                          ]
+                        [ itRow
+                            0
+                            [ { block=fltErth, rabbits=[], things=[] }
+                            , { block=NoBlock, rabbits=[rabl10], things=[] }
+                            , { block=fltErth, rabbits=[], things=[] }
+                            ]
+                        , itRow
+                            1
+                            [ { block=NoBlock
+                              , rabbits=[rabr01, rabr01, rabl01]
+                              , things=[]
+                              }
+                            , { block=fltMetl, rabbits=[rabl11], things=[] }
+                            , { block=fltErth
+                              , rabbits=[rabr21, rabl21]
+                              , things=[]
+                              }
+                            ]
+                        , itRow
+                            2
+                            [ { block=fltErth
+                              , rabbits=[rabr02, rabl02]
+                              , things=[]
+                              }
+                            , { block=NoBlock, rabbits=[rabr12], things=[] }
+                            , { block=fltErth, rabbits=[], things=[] }
+                            ]
                         ]
                     , [starLine5]
                     )
@@ -448,7 +467,7 @@ integrateLinesCases =
             , t "Bad star produces an error"
                 (integrateLines
                     [ [chErth, chRabb10, chErth]
-                    , [StarChar pos01, chErth, chErth]
+                    , [StarChar pos01 pos01, chErth, chErth]
                     ]
                     [StarLine 10 (String.toList "Mr*")] -- star in star
                 )
@@ -516,7 +535,9 @@ parseWorldWithRabbits =
     okAndEqual
         (parseLines
             "tst"
-            [ "   j"
+            [ ":name=xyz"
+            , ":description=copious"
+            , "   j"
             , "   #"
             , "r   "
             , "####"
@@ -535,7 +556,11 @@ parseWorldWithRabbits =
             , makeRabbit 0 2 Right
             ]
             []
-            MetaLines.defaults
+            ( MetaLines.fromList
+                [ ( "name", MvString "xyz" )
+                , ( "description", MvString "copious" )
+                ]
+            )
         )
 
 
@@ -544,7 +569,10 @@ parseWorldWithThings =
     okAndEqual
         (parseLines
             "tst"
-            [ "Q  j"
+            [ ":name=foo"
+            , ":bash=1"
+            , ":block=2"
+            , "Q  j"
             , "   #"
             , "rO  "
             , "####"
@@ -565,8 +593,52 @@ parseWorldWithThings =
             [ Entrance 0 0
             , Exit 1 2
             ]
-            MetaLines.defaults
+            ( MetaLines.fromList
+                [ ( "name", MvString "foo" )
+                , ( "bash", MvInt 1 )
+                , ( "block", MvInt 2 )
+                ]
+            )
         )
+
+
+parseBadWorldLongLine : () -> Expect.Expectation
+parseBadWorldLongLine =
+    notOkAndEqual
+            ( parseLines
+                "tst"
+                [ ":name=foo"
+                , ":bash=1"
+                , ":block=2"
+                , ":brolly=1"
+                , "Q  j#"
+                , "   #"
+                , "rO  "
+                , "####"
+                ]
+            )
+            (  "Line 6, column 4: The lines of this level are different "
+            ++ "lengths - they must be all exactly the same length.  "
+            ++ "The first line was 5 characters long, but this one is 4."
+            )
+
+
+parseBadWorldBadChar : () -> Expect.Expectation
+parseBadWorldBadChar =
+    notOkAndEqual
+            ( parseLines
+                "tst"
+                [ ":name=foo"
+                , ":bash=1"
+                , ":block=2"
+                , ":brolly=1"
+                , "Q  ~"
+                , "   #"
+                , "rO  "
+                , "####"
+                ]
+            )
+            "Line 5, column 4: Unrecognised character: '~'."
 
 
 parseOverlappingRabbits : () -> Expect.Expectation
@@ -574,7 +646,8 @@ parseOverlappingRabbits =
     okAndEqual
         (parseLines
             "tst"
-            [ "   *"
+            [ ":name=bar"
+            , "   *"
             , "   #"
             , "    "
             , "####"
@@ -594,7 +667,10 @@ parseOverlappingRabbits =
             , makeRabbit 3 0 Left
             ]
             []
-            MetaLines.defaults
+            ( MetaLines.fromList
+                [ ( "name", MvString "bar" )
+                ]
+            )
         )
 
 

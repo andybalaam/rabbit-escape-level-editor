@@ -6,6 +6,7 @@ module Item2Text exposing
     , charToBlock
     , charToRabbit
     , charToThing
+    , posOf
     )
 
 
@@ -115,7 +116,7 @@ type alias Pos =
 
 
 type CharItem =
-      StarChar Pos
+      StarChar Pos Pos
     | BlockChar Pos Block
     | RabbitChar Pos Rabbit
     | ThingChar Pos Thing
@@ -124,7 +125,7 @@ type CharItem =
 posOf : CharItem -> Pos
 posOf ch =
     case ch of
-        StarChar p -> p
+        StarChar _ p -> p
         BlockChar p _ -> p
         RabbitChar p _ -> p
         ThingChar p _ -> p

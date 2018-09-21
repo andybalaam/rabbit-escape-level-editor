@@ -41,6 +41,7 @@ import Item2Text exposing
     , charToBlock
     , charToRabbit
     , charToThing
+    , posOf
     , toText
     )
 
@@ -52,8 +53,18 @@ type alias Items =
     }
 
 
+type alias ItemsRow =
+    { physicalRow : Int
+    , items : List Items
+    }
+
+
 type alias Line =
     { row : Int, content : String }
+
+
+type alias GridLine =
+    { gridRow : Int, line : Line }
 
 
 type alias StarLine =
@@ -150,37 +161,37 @@ addRabbitCoords pos rabbit =
     movedRabbit pos.col pos.row rabbit
 
 
-toCharItem : Maybe Pos -> Int -> Int -> Char -> Result ParseErr CharItem
-toCharItem gridPos y x c =
+toCharItem : Maybe Pos -> Int -> Int -> Int -> Char -> Result ParseErr CharItem
+toCharItem gridPosOverride physicalRow gridRow col char =
     let
-        literalPos = { row = y, col = x }
-        pos = case gridPos of
+        physicalPos = { row = physicalRow, col = col }
+        gridPos = case gridPosOverride of
             Just p -> p
-            Nothing -> literalPos
+            Nothing -> { row = gridRow, col = col }
     in
-        if c == '*' then
-            Ok (StarChar literalPos)
-        else case charToBlock c of
+        if char == '*' then
+            Ok (StarChar physicalPos gridPos)
+        else case charToBlock char of
             Just block ->
-                Ok (BlockChar literalPos block)
+                Ok (BlockChar physicalPos block)
             Nothing ->
-                case charToRabbit c of
+                case charToRabbit char of
                     Just rabbit ->
                         Ok
                             (RabbitChar
-                                literalPos
-                                (addRabbitCoords pos rabbit)
+                                gridPos
+                                (addRabbitCoords gridPos rabbit)
                             )
                     Nothing ->
-                        case charToThing c of
+                        case charToThing char of
                         Just thing ->
                             Ok
                                 (ThingChar
-                                    literalPos
-                                    (Thing.moved pos.col pos.row thing)
+                                    gridPos
+                                    (Thing.moved gridPos.col gridPos.row thing)
                                 )
                         Nothing ->
-                            Err ( UnrecognisedChar literalPos c )
+                            Err ( UnrecognisedChar physicalPos char )
 
 
 mergeNewCharIntoOkItems : CharItem -> Items -> Result ParseErr Items
@@ -200,8 +211,8 @@ mergeNewCharIntoOkItems chItem items =
             Ok { items | rabbits = items.rabbits ++ [charRabbit] }
         ThingChar pos charThing ->
             Ok { items | things = items.things ++ [charThing] }
-        StarChar pos ->
-            Err ( StarInsideStarPoint pos )
+        StarChar physicalPos _ ->
+            Err ( StarInsideStarPoint physicalPos )
 
 
 mergeNewCharIntoItems :
@@ -218,8 +229,15 @@ starLineToItems : StarLine -> Pos -> Result ParseErr Items
 starLineToItems starLine gridPos =
     let
         noItems = Ok { block = NoBlock, rabbits = [], things = [] }
+
         -- Items start at column 4, after ":*="
-        toCharItemAt col = toCharItem (Just gridPos) starLine.row (3 + col)
+        toCharItemAt col =
+            toCharItem
+                (Just gridPos)
+                starLine.row
+                0
+                (3 + col)
+
         itemsList = resultCombine (List.indexedMap toCharItemAt starLine.chars)
     in
         case itemsList of
@@ -233,13 +251,13 @@ integrateSquare :
     Result ParseErr (Items, List StarLine)
 integrateSquare ch starLines =
     case ch of
-        StarChar pos ->
+        StarChar physicalPos gridPos ->
             case starLines of
                 starLine :: tail ->
-                    case starLineToItems starLine pos of
+                    case starLineToItems starLine gridPos of
                         Ok items -> Ok (items, tail)
                         Err e -> Err e
-                [] -> Err (NotEnoughStarLines pos)
+                [] -> Err (NotEnoughStarLines physicalPos)
         BlockChar _ b ->
             Ok
                 ( { block = b, rabbits = [], things = [] }
@@ -263,10 +281,17 @@ integrateSquare ch starLines =
                 )
 
 
+physicalRowOf : (List (CharItem)) -> Int
+physicalRowOf items =
+    case items of
+        h :: t -> (posOf h).row
+        _ -> 0
+
+
 integrateLine :
     List CharItem ->
     List StarLine ->
-    Result ParseErr (List Items, List StarLine)
+    Result ParseErr (ItemsRow, List StarLine)
 integrateLine charItems starLines =
     case charItems of
         ch :: others ->
@@ -274,15 +299,23 @@ integrateLine charItems starLines =
                 Err e -> Err e
                 Ok (items, newStarLines) ->
                     case integrateLine others newStarLines of
-                        Err e -> Err e
-                        Ok (itemsList, sl) -> Ok (items :: itemsList, sl)
-        _ -> Ok ([], starLines)
+                        Err e ->
+                            Err e
+                        Ok (itemsList, sl) ->
+                            Ok
+                                (
+                                    { items = items :: itemsList.items
+                                    , physicalRow = physicalRowOf charItems
+                                    }
+                                , sl
+                                )
+        _ -> Ok ({items=[], physicalRow=-27}, starLines)
 
 
 integrateLines :
     List (List CharItem) ->
     List StarLine ->
-    Result ParseErr (List (List Items), List StarLine)
+    Result ParseErr (List (ItemsRow), List StarLine)
 integrateLines grid starLines =
     case grid of
         line :: otherLines ->
@@ -300,7 +333,7 @@ integrateLines grid starLines =
 integrateStarLines :
     Result ParseErr (List (List CharItem)) ->
     Result ParseErr (List StarLine) ->
-    Result ParseErr (List (List Items))
+    Result ParseErr (List (ItemsRow))
 integrateStarLines charItems starLines =
     case charItems of
         Err e -> Err e
@@ -322,21 +355,21 @@ integrateStarLines charItems starLines =
 
 -- Check whether a grid of items has the right length lines,
 -- and return it if so.  If not, return a ParseErr.
-itemsIfValid : List (List Items) -> Result ParseErr (List (List Items))
+itemsIfValid : List (ItemsRow) -> Result ParseErr (List ItemsRow)
 itemsIfValid itemsGrid =
     let
         firstLineLen =
             case List.head itemsGrid of
-                Just firstLine -> List.length firstLine
+                Just firstLine -> List.length firstLine.items
                 Nothing -> -1
 
-        lineIfValid : Int -> Int -> List Items -> Result ParseErr (List Items)
-        lineIfValid requiredLen row line =
+        lineIfValid : Int -> Int -> ItemsRow -> Result ParseErr ItemsRow
+        lineIfValid requiredLen row itemsRow =
             let
-                len = List.length line
+                len = List.length itemsRow.items
             in
                 if len == requiredLen then
-                    Ok line
+                    Ok itemsRow
                 else
                     let
                         col =
@@ -345,7 +378,12 @@ itemsIfValid itemsGrid =
                             else
                                 len - 1
                     in
-                        Err (LineWrongLength {row=row, col=col} requiredLen len)
+                        Err
+                            ( LineWrongLength
+                                {row=itemsRow.physicalRow, col=col}
+                                requiredLen
+                                len
+                            )
     in
         resultCombine (List.indexedMap (lineIfValid firstLineLen) itemsGrid)
 
@@ -365,30 +403,33 @@ parse comment textWorld =
         starLines : Result ParseErr (List StarLine)
         starLines = makeStarLines stLines
 
-        rawItems : Result ParseErr (List (List Items))
+        rawItems : Result ParseErr (List (ItemsRow))
         rawItems = integrateStarLines charItems starLines
 
-        items : Result ParseErr (List (List Items))
+        items : Result ParseErr (List (ItemsRow))
         items = case rawItems of
             Ok a -> itemsIfValid a
             e -> e
 
+        itemsLists : Result ParseErr (List (List Items))
+        itemsLists = Result.map (List.map .items) items
+
         blocks : Result ParseErr (List (List Block))
-        blocks = Result.map (List.map (List.map .block)) items
+        blocks = Result.map (List.map (List.map .block)) itemsLists
 
         grid : Result ParseErr (Grid Block)
         grid = Result.map makeBlockGrid blocks
 
         rabbits : Result ParseErr (List Rabbit)
         rabbits =
-            items                              -- List (List Items)
+            itemsLists                         -- List (List Items)
             |> Result.map List.concat          -- List Items
             |> Result.map (List.map .rabbits)  -- List (List Rabbit)
             |> Result.map List.concat          -- List Rabbit
 
         things : Result ParseErr (List Thing)
         things =
-            items                              -- List (List Items)
+            itemsLists                         -- List (List Items)
             |> Result.map List.concat          -- List Items
             |> Result.map (List.map .things)   -- List (List Thing)
             |> Result.map List.concat          -- List Thing
@@ -426,6 +467,15 @@ isMetaLine line =
     String.left 1 line.content == ":"
 
 
+toGridLines : Int -> List Line -> List GridLine
+toGridLines row lines =
+    case lines of
+        [] ->
+            []
+        line :: tail ->
+            { gridRow = row, line = line } :: toGridLines (row + 1) tail
+
+
 separateLineTypes : List String -> (List Line, List Line, List Line)
 separateLineTypes rawLines =
     let
@@ -448,7 +498,7 @@ makeMetaLines lines =
 
 parseGridLines : List Line -> Result ParseErr (List (List CharItem))
 parseGridLines lines =
-    resultCombine (List.map parseGridLine lines)
+    resultCombine (List.map parseGridLine (toGridLines 0 lines))
 
 
 makeStarLine : Line -> Result ParseErr StarLine
@@ -462,12 +512,12 @@ makeStarLine line =
             )
 
 
-parseGridLine : Line -> Result ParseErr (List CharItem)
-parseGridLine line =
+parseGridLine : GridLine -> Result ParseErr (List CharItem)
+parseGridLine gridLine =
     resultCombine
         (List.indexedMap
-            (toCharItem Nothing line.row)
-            (String.toList line.content)
+            (toCharItem Nothing gridLine.line.row gridLine.gridRow)
+            (String.toList gridLine.line.content)
         )
 
 

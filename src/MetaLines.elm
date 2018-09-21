@@ -45,6 +45,7 @@ defaultList =
     , ("num_rabbits", MvInt 10)
     , ("num_to_save", MvInt 1)
     , ("rabbit_delay", MvString "4") -- TODO: list of ints
+    , ("music", MvString "")
     , ("bash", MvInt 0)
     , ("dig", MvInt 0)
     , ("bridge", MvInt 0)

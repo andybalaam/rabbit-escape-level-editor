@@ -26,7 +26,7 @@ html
         width: 4.7em;
         height: 100%;
     }
-    #workspace
+    #edit-workspace
     {
         margin-left: 4.98em;
     }
@@ -52,7 +52,7 @@ html
         height: 4.7em;
         width: 100%;
     }
-    #workspace
+    #edit-workspace
     {
         margin-top: 4.98em;
     }
@@ -68,9 +68,18 @@ html
     }
 }
 
-#workspace
+#edit-workspace
 {
     display: inline-block;
+    background-color: white;
+    z-index: 0;
+}
+
+
+#view-workspace
+{
+    display: block;
+    overflow: auto;
     background-color: white;
     z-index: 0;
 }

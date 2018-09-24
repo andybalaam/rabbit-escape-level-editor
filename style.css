@@ -152,7 +152,7 @@ html
     z-index: 1;
 }
 
-.viewParseErr
+.view-parse-err
 {
     background-color: black;
     color: red;

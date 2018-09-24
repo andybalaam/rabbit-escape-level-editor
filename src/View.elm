@@ -39,7 +39,7 @@ view model =
             Err e ->
                 [
                     ( div
-                        [ class "viewParseErr" ]
+                        [ class "view-parse-err" ]
                         [ text (parseErrToString e) ]
                     )
                 ]

@@ -7,7 +7,7 @@ import Flags exposing (Flags)
 import FlagsDecoder exposing (flagsDecoder)
 import MetaLines
 import Mode exposing (Mode(..))
-import Model exposing (Model, UiMode(..), UiState)
+import Model exposing (Model, UiMode(..), UiState, ViewMode(..))
 import Msg exposing (Msg(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
 import Update exposing (update)
@@ -35,6 +35,7 @@ initModel flags initialWorldText =
     , world = WorldParser.parse "" initialWorldText
     , uiState =
         { mode = InitialMode
+        , viewMode = Normal
         , block = Nothing
         , rabbit = Just (makeRabbit 0 0 Right)
         , thing = Nothing

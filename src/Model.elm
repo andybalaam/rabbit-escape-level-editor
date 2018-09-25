@@ -1,4 +1,4 @@
-module Model exposing (Model, UiMode(..), UiState)
+module Model exposing (Model, UiMode(..), UiState, ViewMode(..))
 
 
 import Flags exposing (Flags)
@@ -21,8 +21,14 @@ type UiMode =
     | ModifyDetailsMode
 
 
+type ViewMode =
+      Normal
+    | FullScreen
+
+
 type alias UiState =
     { mode : UiMode
+    , viewMode : ViewMode
     , block : Maybe Block
     , rabbit : Maybe Rabbit
     , thing : Maybe (Maybe Thing)

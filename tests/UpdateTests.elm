@@ -9,7 +9,7 @@ import Expect
 import Flags exposing (Flags)
 import MetaLines
 import Mode exposing (Mode(..))
-import Model exposing (Model, UiMode(..), UiState)
+import Model exposing (Model, UiMode(..), UiState, ViewMode(..))
 import Msg exposing (Msg(..))
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
@@ -763,6 +763,7 @@ expectUpdateGives num initModel msgsAndModels =
 emptyState : UiState
 emptyState =
     { mode = InitialMode
+    , viewMode = Normal
     , block = Nothing
     , rabbit = Nothing
     , thing = Nothing

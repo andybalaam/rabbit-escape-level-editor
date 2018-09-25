@@ -84,6 +84,35 @@ html
     z-index: 0;
 }
 
+#view-workspace.fullscreen
+{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 1001;
+}
+
+button.toggle-fullscreen
+{
+    position: absolute;
+    opacity: 0.8;
+    margin-top: 1em;
+    margin-left: 1em;
+    z-index: 2;
+    width: 4em;
+    height: 4em;
+    padding: 0px;
+}
+
+button.toggle-fullscreen img
+{
+    width: 3.1em;
+    height: 3.1em;
+    margin: auto;
+}
+
 #toolbar
 {
     position: fixed;

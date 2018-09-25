@@ -2,7 +2,7 @@ module Update exposing (update)
 
 
 import MetaLines exposing (MetaLines)
-import Model exposing (Model, UiMode(..))
+import Model exposing (Model, UiMode(..), ViewMode(..))
 import Msg exposing (Msg(..))
 import Rabbit exposing (Rabbit, movedRabbit)
 import Thing exposing (Thing(..))
@@ -74,6 +74,8 @@ normalUpdate msg model =
                     updateCodeInput model text
                 ChangeCode ->
                     updateChangeCode model
+                ToggleFullScreen ->
+                    updateToggleFullScreen model
                 Undo ->
                     model  -- Should never happen - covered in update
                 Redo ->
@@ -128,6 +130,23 @@ updateChangeCode model =
                     , mode = InitialMode
                     }
                 }
+
+
+updateToggleFullScreen : Model -> Model
+updateToggleFullScreen model =
+    let
+        uiState = model.uiState
+        viewMode = uiState.viewMode
+    in
+        { model
+        | uiState =
+            { uiState
+            | viewMode =
+                case viewMode of
+                    FullScreen -> Normal
+                    Normal -> FullScreen
+            }
+        }
 
 
 updateDetailsInput : Model -> String -> String -> Model

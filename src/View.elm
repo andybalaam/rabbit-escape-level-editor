@@ -30,11 +30,11 @@ view model =
                     Edit ->
                         (
                             [ (viewToolbar model)
-                            , (viewWorkspace model.flags w)
+                            , (viewWorkspace model.flags model.uiState w)
                             ] ++ (viewDialog model w)
                         )
                     View ->
-                        [ viewWorkspace model.flags w ]
+                        [ viewWorkspace model.flags model.uiState w ]
                 )
             Err e ->
                 [

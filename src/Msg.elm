@@ -23,3 +23,4 @@ type Msg =
     | ChangeDetails
     | CodeInput String
     | ChangeCode
+    | ToggleFullScreen

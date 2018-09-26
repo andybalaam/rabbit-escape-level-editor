@@ -1,7 +1,7 @@
 module ViewWorkspace exposing (viewWorkspace)
 
-import Html exposing (Html, button, div, img, text)
-import Html.Attributes exposing (alt, class, id, src)
+import Html exposing (Html, button, div)
+import Html.Attributes exposing (alt, class, id, src, style)
 import Html.Events exposing (onClick)
 
 import ImagePath exposing (imagePath)
@@ -19,9 +19,9 @@ fullScreenButton uiState flags =
     button
         [ onClick (ToggleFullScreen)
         , class "toggle-fullscreen"
-        ]
-        [ img
-            [ src
+        , style
+            "background-image"
+            ( "url('" ++
                 ( imagePath
                     flags
                     ( case uiState.viewMode of
@@ -29,14 +29,11 @@ fullScreenButton uiState flags =
                         Normal -> "full_screen.svg"
                     )
                 )
-            , alt
-                    ( case uiState.viewMode of
-                        FullScreen -> "Not full screen"
-                        Normal -> "Full screen"
-                    )
-            ]
-            []
+                ++ "')"
+            )
+        , style "background-size" "contain"
         ]
+        []
 
 
 viewWorkspace : Flags -> UiState -> World -> Html Msg

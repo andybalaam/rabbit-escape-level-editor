@@ -39,9 +39,15 @@ defaultList =
     , ("hint.1", MvString "")
     , ("hint.2", MvString "") -- TODO: expandable lists?
     , ("hint.3", MvString "")
+    , ("hint.1.code", MvString "")
+    , ("hint.2.code", MvString "")
+    , ("hint.3.code", MvString "")
     , ("solution.1", MvString "")
     , ("solution.2", MvString "")
     , ("solution.3", MvString "")
+    , ("solution.1.code", MvString "")
+    , ("solution.2.code", MvString "")
+    , ("solution.3.code", MvString "")
     , ("num_rabbits", MvInt 10)
     , ("num_to_save", MvInt 1)
     , ("rabbit_delay", MvString "4") -- TODO: list of ints

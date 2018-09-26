@@ -12,7 +12,7 @@ www/images/%: images/% www/images
 www/images: www
 	mkdir -p $@
 
-www/index.html: index.html www
+www/%.html: %.html www
 	cp $< $@
 
 www/style.css: style.css www
@@ -20,7 +20,7 @@ www/style.css: style.css www
 
 images: ${IMAGES}
 
-index: www/index.html www/style.css
+index: www/index.html www/index-view.html www/style.css
 
 # TODO https://elm-lang.org/0.19.0/optimize
 

@@ -19,7 +19,8 @@ import World exposing (Block(..), BlockMaterial(..), BlockShape(..))
 
 
 type ButtonDef =
-      SaveButton
+      CodeButton
+    | SaveAndQuitButton
     | UndoButton
     | RedoButton
     | BlockButton
@@ -30,23 +31,26 @@ type ButtonDef =
 
 buttonsList : List ButtonDef
 buttonsList =
-    [ SaveButton
+    [ SaveAndQuitButton
     , UndoButton
     , RedoButton
     , BlockButton
     , ThingButton
     , RabbitButton
     , DetailsButton
+    , CodeButton
     ]
 
 
 buildClickCmd : UiState -> ButtonDef -> Msg
 buildClickCmd uiState buttonDef =
     case buttonDef of
-        SaveButton  ->
+        CodeButton  ->
             case uiState.mode of
                 CodeMode _ -> ChangeMode InitialMode
                 _    -> ChangeMode (CodeMode "")
+        SaveAndQuitButton ->
+            SaveAndQuit
         UndoButton ->
             Undo
         RedoButton ->
@@ -72,7 +76,8 @@ buildClickCmd uiState buttonDef =
 buttonImage : UiState -> ButtonDef -> String
 buttonImage uiState buttondef =
     case buttondef of
-        SaveButton -> "save.svg"
+        CodeButton -> "code.svg"
+        SaveAndQuitButton -> "save.svg"
         UndoButton -> "undo.svg"
         RedoButton -> "redo.svg"
         DetailsButton -> "details.svg"
@@ -94,7 +99,7 @@ pressedClass mode buttondef =
         pressedTypes =
             case mode of
                 InitialMode -> []
-                CodeMode _ -> [SaveButton]
+                CodeMode _ -> [CodeButton]
                 ChooseBlockMode -> [BlockButton]
                 PlaceBlockMode -> [BlockButton]
                 ChooseThingMode -> [ThingButton]
@@ -115,7 +120,7 @@ buttonEnabled model buttondef =
         case model.uiState.mode of
             CodeMode _ ->
                 case buttondef of
-                    SaveButton -> False
+                    CodeButton -> False
                     _ -> True
             ModifyDetailsMode ->
                 case buttondef of

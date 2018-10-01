@@ -1,9 +1,13 @@
 module Update exposing (update)
 
 
+import Json.Encode as E
+
+
 import MetaLines exposing (MetaLines)
 import Model exposing (Model, UiMode(..), ViewMode(..))
 import Msg exposing (Msg(..))
+import Ports exposing (saveAndQuit)
 import Rabbit exposing (Rabbit, movedRabbit)
 import Thing exposing (Thing(..))
 import World exposing
@@ -21,21 +25,30 @@ import WorldTextRender
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    let
-
-        updatedModel =
-            case msg of
-                Undo -> updateUndo model
-                Redo -> updateRedo model
-                _ -> normalUpdate msg model
-    in
-        (updatedModel, Cmd.none)
+    case msg of
+        SaveAndQuit ->
+            let
+                w : String
+                w =
+                    case model.world of
+                        Ok world -> WorldTextRender.render world
+                        _ -> ""
+            in
+                (model , saveAndQuit (E.string w))
+        _->
+            let
+                updatedModel =
+                    case msg of
+                        Undo -> updateUndo model
+                        Redo -> updateRedo model
+                        _ -> normalUpdate msg model
+            in
+                (updatedModel, Cmd.none)
 
 
 normalUpdate : Msg -> Model -> Model
 normalUpdate msg model =
     let
-
         updatedModel =
             case msg of
                 LevelClick x y ->
@@ -79,6 +92,8 @@ normalUpdate msg model =
                 Undo ->
                     model  -- Should never happen - covered in update
                 Redo ->
+                    model  -- Should never happen - covered in update
+                SaveAndQuit ->
                     model  -- Should never happen - covered in update
     in
         -- If something changed, remember in undo stack.

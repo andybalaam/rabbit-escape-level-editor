@@ -18,6 +18,19 @@
         urlPrefix: ""
     }
   });
+  app.ports.saveAndQuit.subscribe(function(data) {
+    console.log(data);
+    alert(
+        "Sorry, the standalone level editor can't save!  " +
+        "Please copy and paste the text version of the level " +
+        "by clicking the 'code' button at the far end of the " +
+        "toolbar.  For a more convenient editing interface, " +
+        "with a working save button, see " +
+        "http://artificialworlds.net/rabbit-escape/levels .  " +
+        "[Note: I printed your level out to the browser console " +
+        "too, in case it's helpful.]"
+    );
+  });
   </script>
 </body>
 </html>

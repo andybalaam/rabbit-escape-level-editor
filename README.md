@@ -2,9 +2,7 @@
 
 A level editor for [Rabbit Escape](http://artificialworlds.net/rabbit-escape).
 
-Try out the prototype here: http://artificialworlds.net/rabbit-escape/level-editor/
-
-When we're ready, the site for making, sharing and commenting on levels will be here: https://artificialworlds.net/rabbit-escape/levels/
+Find new levels and create your own here: https://artificialworlds.net/rabbit-escape/levels/
 
 ## Setup
 
@@ -14,7 +12,6 @@ When we're ready, the site for making, sharing and commenting on levels will be 
 make setup
 ```
 
-
 ## Test
 
 ```bash
@@ -23,3 +20,7 @@ make
 
 Open index.html in a browser.  To try out different levels as starting
 points, edit index.html and refresh the page.
+
+## Standalone level editor (no "Save")
+
+You can access the level editor in standalone mode here: http://artificialworlds.net/rabbit-escape/level-editor/ but bear in mind it has nowhere to save your level, so you will need to copy and paste your creations as code to keep them!

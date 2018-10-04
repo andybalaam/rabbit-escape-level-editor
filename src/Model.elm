@@ -18,6 +18,7 @@ type UiMode =
     | PlaceThingMode
     | ChooseRabbitMode
     | PlaceRabbitMode
+    | DeleteMode
     | ModifyDetailsMode
 
 

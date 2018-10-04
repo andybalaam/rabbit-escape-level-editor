@@ -61,6 +61,8 @@ normalUpdate msg model =
                             updateLevelClickThing model x y
                         PlaceRabbitMode ->
                             updateLevelClickRabbit model x y
+                        DeleteMode ->
+                            updateLevelDelete model x y
                         _ ->
                             model
                 ChangeMode mode ->
@@ -285,6 +287,80 @@ updateModelWorld model fn =
         _ -> model
 
 
+updateLevelDelete : Model -> Int -> Int -> Model
+updateLevelDelete model x y =
+    updateModelWorld model (updateLevelDeleteWorld x y)
+
+
+removeRabbitsAt : World -> Int -> Int -> World
+removeRabbitsAt world x y =
+    makeWorld
+        world.comment
+        world.blocks
+        (List.filter (\r -> r.x /= x || r.y /= y) world.rabbits)
+        world.things
+        world.metaLines
+
+
+removeThingsAt : World -> Int -> Int -> World
+removeThingsAt world x y =
+    makeWorld
+        world.comment
+        world.blocks
+        world.rabbits
+        (List.filter (\t -> Thing.pos t /= (x, y)) world.things)
+        world.metaLines
+
+
+removeBlockAt : World -> Int -> Int -> World
+removeBlockAt world removeX removeY =
+    let
+        removeBlock : Int -> Block -> Block
+        removeBlock currentX block =
+            if currentX == removeX then
+                NoBlock
+            else
+                block
+
+        removeFromList : Int -> List Block -> List Block
+        removeFromList currentY blocksRow =
+            if currentY == removeY then
+                List.indexedMap removeBlock blocksRow
+            else
+                blocksRow
+
+        removeFromBlocks : List (List Block) -> List (List Block)
+        removeFromBlocks blocks =
+            List.indexedMap removeFromList blocks
+    in
+        makeWorld
+            world.comment
+            (makeBlockGrid (removeFromBlocks (blocks world)))
+            world.rabbits
+            world.things
+            world.metaLines
+
+
+hasRabbit : Int -> Int -> World -> Bool
+hasRabbit x y world =
+    List.any (\r -> r.x == x && r.y == y) world.rabbits
+
+
+hasThing : Int -> Int -> World -> Bool
+hasThing x y world =
+    List.any (\t -> Thing.pos t == (x, y)) world.things
+
+
+updateLevelDeleteWorld : Int -> Int -> World -> World
+updateLevelDeleteWorld x y world =
+    if hasRabbit x y world then
+        removeRabbitsAt world x y
+    else if hasThing x y world then
+        removeThingsAt world x y
+    else
+        removeBlockAt world x y
+
+
 updateLevelClickRabbit : Model -> Int -> Int -> Model
 updateLevelClickRabbit model x y =
     updateModelWorld
@@ -294,22 +370,16 @@ updateLevelClickRabbit model x y =
 
 updateLevelClickRabbitWorld : Maybe Rabbit -> Int -> Int -> World -> World
 updateLevelClickRabbitWorld newRabbit x y world =
-    let
-        rabbits =
-            case newRabbit of
-                Nothing ->
-                    List.filter
-                        (\rabbit -> rabbit.x /= x || rabbit.y /= y)
-                        world.rabbits
-                Just r ->
-                    movedRabbit x y r :: world.rabbits
-    in
-        makeWorld
-            world.comment
-            world.blocks
-            rabbits
-            world.things
-            world.metaLines
+    case newRabbit of
+        Nothing ->
+            removeRabbitsAt world x y
+        Just r ->
+            makeWorld
+                world.comment
+                world.blocks
+                (movedRabbit x y r :: world.rabbits)
+                world.things
+                world.metaLines
 
 
 updateLevelClickThing : Model -> Int -> Int -> Model

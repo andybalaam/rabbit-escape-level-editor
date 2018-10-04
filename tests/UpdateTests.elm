@@ -49,6 +49,79 @@ all =
               )
             ]
 
+
+        , testActions "Removing a block with delete"
+            ( [ "####"
+              , "#  #"
+              , "# r#"
+              , "####"
+              ]
+            , { emptyState
+              | mode = DeleteMode
+              }
+            )
+            [ ( (LevelClick 0 0)
+              , [ " ###"
+                , "#  #"
+                , "# r#"
+                , "####"
+                ]
+              , { emptyState
+                | mode = DeleteMode
+                }
+              )
+            ]
+
+
+        , testActions "Delete on a rabbit+block removes the rabbit"
+            ( [ "####"
+              , "#  #"
+              , "# *#"
+              , "####"
+              , ":*=r/"
+              ]
+            , { emptyState
+              | mode = DeleteMode
+              }
+            )
+            [ ( (LevelClick 2 2)
+              , [ "####"
+                , "#  #"
+                , "# /#"
+                , "####"
+                ]
+              , { emptyState
+                | mode = DeleteMode
+                }
+              )
+            ]
+
+
+        , testActions "Delete on a busy square removes all rabbits"
+            ( [ "####"
+              , "#  #"
+              , "# *#"
+              , "####"
+              , ":*=rrrbbb/"
+              ]
+            , { emptyState
+              | mode = DeleteMode
+              }
+            )
+            [ ( (LevelClick 2 2)
+              , [ "####"
+                , "#  #"
+                , "# *#"
+                , "####"
+                , ":*=bbb/"
+                ]
+              , { emptyState
+                | mode = DeleteMode
+                }
+              )
+            ]
+
+
         , testActions "Clicking full replaces with chosen block"
             ( [ "####"
               , "#  #"
@@ -148,6 +221,57 @@ all =
             ]
 
 
+        , testActions "Removing a thing with delete"
+            ( [ "####"
+              , "# O#"
+              , "#  #"
+              , "####"
+              ]
+            , { emptyState
+              | mode = DeleteMode
+              , thing = Just Nothing
+              }
+            )
+            [ ( (LevelClick 2 1)
+              , [ "####"
+                , "#  #"
+                , "#  #"
+                , "####"
+                ]
+              , { emptyState
+                | mode = DeleteMode
+                , thing = Just Nothing
+                }
+              )
+            ]
+
+
+        , testActions "Removing multiple things on a block"
+            ( [ "####"
+              , "#  #"
+              , "# *#"
+              , "####"
+              , ":*=bip#"
+              ]
+            , { emptyState
+              | mode = DeleteMode
+              , thing = Just Nothing
+              }
+            )
+            [ ( (LevelClick 2 2)
+              , [ "####"
+                , "#  #"
+                , "# ##"
+                , "####"
+                ]
+              , { emptyState
+                | mode = DeleteMode
+                , thing = Just Nothing
+                }
+              )
+            ]
+
+
         , testActions "Removing a rabbit"
             ( [ "####"
               , "# j#"
@@ -178,6 +302,42 @@ all =
                 ]
               , { emptyState
                 | mode = PlaceRabbitMode
+                , rabbit = Nothing
+                }
+              )
+            ]
+
+
+        , testActions "Removing a rabbit with delete"
+            ( [ "####"
+              , "# j#"
+              , "# r#"
+              , "####"
+              ]
+            , { emptyState
+              | mode = DeleteMode
+              , rabbit = Nothing
+              }
+            )
+            [ ( (LevelClick 1 1)  -- Click on nothing
+              , [ "####"
+                , "# j#"
+                , "# r#"
+                , "####"
+                ]
+              , { emptyState
+                | mode = DeleteMode
+                , rabbit = Nothing
+                }
+              )
+            , ( (LevelClick 2 2)  -- Click the rabbit
+              , [ "####"
+                , "# j#"
+                , "#  #"
+                , "####"
+                ]
+              , { emptyState
+                | mode = DeleteMode
                 , rabbit = Nothing
                 }
               )

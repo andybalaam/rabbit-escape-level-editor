@@ -26,6 +26,7 @@ type ButtonDef =
     | BlockButton
     | ThingButton
     | RabbitButton
+    | DeleteButton
     | DetailsButton
 
 
@@ -37,6 +38,7 @@ buttonsList =
     , BlockButton
     , ThingButton
     , RabbitButton
+    , DeleteButton
     , DetailsButton
     , CodeButton
     ]
@@ -67,6 +69,8 @@ buildClickCmd uiState buttonDef =
             case uiState.mode of
                 ChooseRabbitMode -> ChangeMode PlaceRabbitMode
                 _          -> ChangeMode ChooseRabbitMode
+        DeleteButton ->
+            ChangeMode DeleteMode
         DetailsButton ->
             case uiState.mode of
                 ModifyDetailsMode -> ChangeMode InitialMode
@@ -91,6 +95,7 @@ buttonImage uiState buttondef =
                 Just thing -> thingImage thing
         RabbitButton ->
             rabbitImage uiState.rabbit
+        DeleteButton -> "delete.svg"
 
 
 pressedClass : UiMode -> ButtonDef -> List (Html.Attribute Msg)
@@ -106,6 +111,7 @@ pressedClass mode buttondef =
                 PlaceThingMode -> [ThingButton]
                 ChooseRabbitMode -> [RabbitButton]
                 PlaceRabbitMode -> [RabbitButton]
+                DeleteMode -> [DeleteButton]
                 ModifyDetailsMode -> [DetailsButton]
     in
         if List.member buttondef pressedTypes then

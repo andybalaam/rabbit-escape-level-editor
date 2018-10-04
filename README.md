@@ -4,6 +4,8 @@ A level editor for [Rabbit Escape](http://artificialworlds.net/rabbit-escape).
 
 Find new levels and create your own here: https://artificialworlds.net/rabbit-escape/levels/
 
+The level editor is written in [Elm](https://elm-lang.org), which is a cool language that compiles to JavaScript to be embedded in a web page.
+
 ## Setup
 
 [Install Elm](https://guide.elm-lang.org/install.html).

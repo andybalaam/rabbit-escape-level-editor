@@ -10,11 +10,13 @@ To find out how to create levels, see https://www.artificialworlds.net/rabbit-es
 
 ## Setup
 
-[Install Elm](https://guide.elm-lang.org/install.html).
+[Install Elm](https://guide.elm-lang.org/install.html), then run:
 
 ```bash
 make setup
 ```
+
+If that doesn't work, please create a new issue, because it should ;-)
 
 ## Test
 

@@ -36,9 +36,7 @@ initModel flags initialWorldText =
     , uiState =
         { mode = InitialMode
         , viewMode = Normal
-        , block = Nothing
-        , rabbit = Just (makeRabbit 0 0 Right)
-        , thing = Nothing
+        , item = Nothing
         , newMetaLines = MetaLines.emptyDiff
         , newWorld = Nothing
         }

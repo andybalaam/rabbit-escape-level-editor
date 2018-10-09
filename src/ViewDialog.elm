@@ -20,7 +20,7 @@ import Html.Events exposing (onClick, onInput)
 import BlockImage exposing (blockImage)
 import ImagePath exposing (imagePath)
 import MetaLines exposing (MetaValue(..))
-import Model exposing (Model, UiMode(..), UiState)
+import Model exposing (Item(..), Model, UiMode(..), UiState)
 import Msg exposing (Msg(..))
 import World exposing (Block(..), BlockMaterial(..), BlockShape(..), World)
 import WorldParser exposing (parseErrToString)
@@ -49,84 +49,77 @@ tp model s attrs =
     p attrs [text (model.t s)]
 
 
-chooseBlockButtons : Model -> Contents
-chooseBlockButtons model =
+blockButtons : Model -> List (Html Msg)
+blockButtons model =
     let
         but : Block -> Html Msg
         but block =
             button
-                [ onClick (ChangeBlock block) ]
+                [ onClick (ChangeItem (BlockItem block)) ]
                 [ img [ src (imagePath model.flags (blockImage block)) ] [] ]
     in
-        { visible =
-            True
-        , dialogStyles =
-            [ style "overflow" "auto" ]
-        , items =
-            [ tp model "Choose a block:" []
-            , but (Block Earth Flat)
-            , but (Block Earth UpRight)
-            , but (Block Earth UpLeft)
-            , but (Block Earth BridgeUpRight)
-            , but (Block Earth BridgeUpLeft)
-            , but (Block Metal Flat)
-            , but (NoBlock)
-            ]
-        }
+        [ tp model "Choose a block:" []
+        , but (Block Earth Flat)
+        , but (Block Earth UpRight)
+        , but (Block Earth UpLeft)
+        , but (Block Earth BridgeUpRight)
+        , but (Block Earth BridgeUpLeft)
+        , but (Block Metal Flat)
+        ]
 
 
-chooseRabbitButtons : Model -> Contents
-chooseRabbitButtons model =
+rabbitButtons : Model -> List (Html Msg)
+rabbitButtons model =
     let
-        but : Maybe Rabbit -> Html Msg
+        but : Rabbit -> Html Msg
         but rabbit =
             button
-                [ onClick (ChangeRabbit rabbit) ]
+                [ onClick (ChangeItem (RabbitItem rabbit)) ]
                 [ img [ src (imagePath model.flags (rabbitImage rabbit)) ] [] ]
     in
-        { visible =
-            True
-        , dialogStyles =
-            [ style "overflow" "auto" ]
-        , items =
-            [ tp model "Choose a rabbit:" []
-            , but (Just (makeRabbit 0 0 Right))
-            , but (Just (makeRabbit 0 0 Left))
-            , but (Just (makeRabbot 0 0 Right))
-            , but (Just (makeRabbot 0 0 Left))
-            , but (Nothing)
-            ]
-        }
+        [ tp model "Choose a rabbit:" []
+        , but (makeRabbit 0 0 Right)
+        , but (makeRabbit 0 0 Left)
+        , but (makeRabbot 0 0 Right)
+        , but (makeRabbot 0 0 Left)
+        ]
 
 
-chooseThingButtons : Model -> Contents
-chooseThingButtons model =
+thingButtons : Model -> List (Html Msg)
+thingButtons model =
     let
-        but : Maybe Thing -> Html Msg
+        but : Thing -> Html Msg
         but thing =
             button
-                [ onClick (ChangeThing thing) ]
+                [ onClick (ChangeItem (ThingItem thing)) ]
                 [ img [ src (imagePath model.flags (thingImage thing)) ] [] ]
     in
-        { visible =
-            True
-        , dialogStyles =
-            [ style "overflow" "auto" ]
-        , items =
-            [ tp model "Choose an item:" []
-            , but (Just (Entrance 0 0))
-            , but (Just (Exit 0 0))
-            , but (Just (Fire 0 0))
-            , but (Just (Token Bash 0 0))
-            , but (Just (Token Dig 0 0))
-            , but (Just (Token Bridge 0 0))
-            , but (Just (Token BlockT 0 0))
-            , but (Just (Token Climb 0 0))
-            , but (Just (Token Explode 0 0))
-            , but (Just (Token Brolly 0 0))
-            , but (Nothing)
-            ]
-        }
+        [ tp model "Choose an item:" []
+        , but (Entrance 0 0)
+        , but (Exit 0 0)
+        , but (Fire 0 0)
+        , but (Token Bash 0 0)
+        , but (Token Dig 0 0)
+        , but (Token Bridge 0 0)
+        , but (Token BlockT 0 0)
+        , but (Token Climb 0 0)
+        , but (Token Explode 0 0)
+        , but (Token Brolly 0 0)
+        ]
+
+
+chooseItemButtons : Model -> Contents
+chooseItemButtons model =
+    { visible =
+        True
+    , dialogStyles =
+        [ style "overflow" "auto" ]
+    , items =
+        (  blockButtons model
+        ++ thingButtons model
+        ++ rabbitButtons model
+        )
+    }
 
 
 codeText : Model -> World -> String -> Contents
@@ -306,9 +299,7 @@ viewDialog : Model -> World -> List (Html Msg)
 viewDialog model world =
     drawDialog
         ( case model.uiState.mode of
-            ChooseBlockMode   -> chooseBlockButtons model
-            ChooseThingMode   -> chooseThingButtons model
-            ChooseRabbitMode  -> chooseRabbitButtons model
+            ChooseItemMode    -> chooseItemButtons model
             CodeMode code     -> codeText model world code
             ModifyDetailsMode -> modifyDetailsControls model world
             other             -> invisible

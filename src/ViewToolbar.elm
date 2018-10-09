@@ -12,22 +12,20 @@ import Html.Events exposing (onClick)
 
 import ImagePath exposing (imagePath)
 import Msg exposing (Msg(..))
-import Model exposing (Model, UiMode(..), UiState)
+import Model exposing (Item(..), Model, UiMode(..), UiState)
 import RabbitImage exposing (rabbitImage)
 import ThingImage exposing (thingImage)
 import World exposing (Block(..), BlockMaterial(..), BlockShape(..))
 
 
 type ButtonDef =
-      CodeButton
-    | SaveAndQuitButton
+      SaveAndQuitButton
     | UndoButton
     | RedoButton
-    | BlockButton
-    | ThingButton
-    | RabbitButton
+    | ItemButton
     | DeleteButton
     | DetailsButton
+    | CodeButton
 
 
 buttonsList : List ButtonDef
@@ -35,9 +33,7 @@ buttonsList =
     [ SaveAndQuitButton
     , UndoButton
     , RedoButton
-    , BlockButton
-    , ThingButton
-    , RabbitButton
+    , ItemButton
     , DeleteButton
     , DetailsButton
     , CodeButton
@@ -57,24 +53,16 @@ buildClickCmd uiState buttonDef =
             Undo
         RedoButton ->
             Redo
-        BlockButton ->
+        ItemButton ->
             case uiState.mode of
-                ChooseBlockMode -> ChangeMode PlaceBlockMode
-                _         -> ChangeMode ChooseBlockMode
-        ThingButton ->
-            case uiState.mode of
-                ChooseThingMode -> ChangeMode PlaceThingMode
-                _         -> ChangeMode ChooseThingMode
-        RabbitButton ->
-            case uiState.mode of
-                ChooseRabbitMode -> ChangeMode PlaceRabbitMode
-                _          -> ChangeMode ChooseRabbitMode
+                ChooseItemMode -> ChangeMode PlaceItemMode
+                _              -> ChangeMode ChooseItemMode
         DeleteButton ->
             ChangeMode DeleteMode
         DetailsButton ->
             case uiState.mode of
                 ModifyDetailsMode -> ChangeMode InitialMode
-                _           -> ChangeMode ModifyDetailsMode
+                _                 -> ChangeMode ModifyDetailsMode
 
 
 buttonImage : UiState -> ButtonDef -> String
@@ -85,16 +73,14 @@ buttonImage uiState buttondef =
         UndoButton -> "undo.svg"
         RedoButton -> "redo.svg"
         DetailsButton -> "details.svg"
-        BlockButton ->
-            case uiState.block of
-                Nothing    -> "allblocks.png"
-                Just block -> blockImage block
-        ThingButton ->
-            case uiState.thing of
-                Nothing    -> "allthings.png"
-                Just thing -> thingImage thing
-        RabbitButton ->
-            rabbitImage uiState.rabbit
+        ItemButton ->
+            case uiState.item of
+                Nothing    -> "allitems.png"
+                Just item ->
+                    case item of
+                        BlockItem b -> blockImage b
+                        ThingItem t -> thingImage t
+                        RabbitItem r -> rabbitImage r
         DeleteButton -> "delete.svg"
 
 
@@ -105,12 +91,8 @@ pressedClass mode buttondef =
             case mode of
                 InitialMode -> []
                 CodeMode _ -> [CodeButton]
-                ChooseBlockMode -> [BlockButton]
-                PlaceBlockMode -> [BlockButton]
-                ChooseThingMode -> [ThingButton]
-                PlaceThingMode -> [ThingButton]
-                ChooseRabbitMode -> [RabbitButton]
-                PlaceRabbitMode -> [RabbitButton]
+                ChooseItemMode -> [ItemButton]
+                PlaceItemMode -> [ItemButton]
                 DeleteMode -> [DeleteButton]
                 ModifyDetailsMode -> [DetailsButton]
     in

@@ -5,7 +5,7 @@ import Json.Encode as E
 
 
 import MetaLines exposing (MetaLines)
-import Model exposing (Model, UiMode(..), ViewMode(..))
+import Model exposing (Item(..), Model, UiMode(..), ViewMode(..))
 import Msg exposing (Msg(..))
 import Ports exposing (saveAndQuit)
 import Rabbit exposing (Rabbit, movedRabbit)
@@ -15,7 +15,10 @@ import World exposing
     , BlockMaterial(..)
     , BlockShape(..)
     , World
+    , addThing
+    , addRabbit
     , blocks
+    , changeBlock
     , makeWorld
     , makeBlockGrid
     )
@@ -34,7 +37,7 @@ update msg model =
                         Ok world -> WorldTextRender.render world
                         _ -> ""
             in
-                (model , saveAndQuit (E.string w))
+                (model, saveAndQuit (E.string w))
         _->
             let
                 updatedModel =
@@ -54,25 +57,17 @@ normalUpdate msg model =
                 LevelClick x y ->
                     case model.uiState.mode of
                         InitialMode ->
-                            updateLevelClickBlock model x y
-                        PlaceBlockMode ->
-                            updateLevelClickBlock model x y
-                        PlaceThingMode ->
-                            updateLevelClickThing model x y
-                        PlaceRabbitMode ->
-                            updateLevelClickRabbit model x y
+                            updateLevelClick model x y
+                        PlaceItemMode ->
+                            updateLevelClick model x y
                         DeleteMode ->
                             updateLevelDelete model x y
                         _ ->
                             model
+                ChangeItem item ->
+                    updateChangeItem model item
                 ChangeMode mode ->
                     updateChangeMode model mode
-                ChangeBlock block ->
-                    updateChangeBlock model block
-                ChangeThing thing ->
-                    updateChangeThing model thing
-                ChangeRabbit rabbit ->
-                    updateChangeRabbit model rabbit
                 AddColumn ->
                     updateAddColumn model
                 RemoveColumn ->
@@ -121,6 +116,19 @@ updateCodeInput model text =
         | uiState =
             { uiState
             | newWorld = Just (text, parse "" text)
+            }
+        }
+
+updateChangeItem : Model -> Item -> Model
+updateChangeItem model item =
+    let
+        uiState = model.uiState
+    in
+        { model
+        | uiState =
+            { uiState
+            | item = Just item
+            , mode = PlaceItemMode
             }
         }
 
@@ -235,48 +243,6 @@ updateRedo model =
             }
 
 
-updateChangeBlock : Model -> Block -> Model
-updateChangeBlock model block =
-    let
-        uiState = model.uiState
-    in
-        { model
-        | uiState =
-            { uiState
-            | mode = PlaceBlockMode
-            , block = Just block
-            }
-        }
-
-
-updateChangeRabbit : Model -> Maybe Rabbit -> Model
-updateChangeRabbit model rabbit =
-    let
-        uiState = model.uiState
-    in
-        { model
-        | uiState =
-            { uiState
-            | mode = PlaceRabbitMode
-            , rabbit = rabbit
-            }
-        }
-
-
-updateChangeThing : Model -> Maybe Thing -> Model
-updateChangeThing model thing =
-    let
-        uiState = model.uiState
-    in
-        { model
-        | uiState =
-            { uiState
-            | mode = PlaceThingMode
-            , thing = Just thing
-            }
-        }
-
-
 -- Use the supplied function to update this Model's world,
 -- unless this model has an invalid world, in which case
 -- do nothing.
@@ -289,7 +255,17 @@ updateModelWorld model fn =
 
 updateLevelDelete : Model -> Int -> Int -> Model
 updateLevelDelete model x y =
-    updateModelWorld model (updateLevelDeleteWorld x y)
+    let
+        newWorld : World -> World
+        newWorld w = 
+            if hasRabbit x y w then
+                removeRabbitsAt w x y
+            else if hasThing x y w then
+                removeThingsAt w x y
+            else
+                changeBlock w x y NoBlock
+    in
+        updateModelWorld model newWorld
 
 
 removeRabbitsAt : World -> Int -> Int -> World
@@ -312,35 +288,6 @@ removeThingsAt world x y =
         world.metaLines
 
 
-removeBlockAt : World -> Int -> Int -> World
-removeBlockAt world removeX removeY =
-    let
-        removeBlock : Int -> Block -> Block
-        removeBlock currentX block =
-            if currentX == removeX then
-                NoBlock
-            else
-                block
-
-        removeFromList : Int -> List Block -> List Block
-        removeFromList currentY blocksRow =
-            if currentY == removeY then
-                List.indexedMap removeBlock blocksRow
-            else
-                blocksRow
-
-        removeFromBlocks : List (List Block) -> List (List Block)
-        removeFromBlocks blocks =
-            List.indexedMap removeFromList blocks
-    in
-        makeWorld
-            world.comment
-            (makeBlockGrid (removeFromBlocks (blocks world)))
-            world.rabbits
-            world.things
-            world.metaLines
-
-
 hasRabbit : Int -> Int -> World -> Bool
 hasRabbit x y world =
     List.any (\r -> r.x == x && r.y == y) world.rabbits
@@ -351,107 +298,22 @@ hasThing x y world =
     List.any (\t -> Thing.pos t == (x, y)) world.things
 
 
-updateLevelDeleteWorld : Int -> Int -> World -> World
-updateLevelDeleteWorld x y world =
-    if hasRabbit x y world then
-        removeRabbitsAt world x y
-    else if hasThing x y world then
-        removeThingsAt world x y
-    else
-        removeBlockAt world x y
-
-
-updateLevelClickRabbit : Model -> Int -> Int -> Model
-updateLevelClickRabbit model x y =
-    updateModelWorld
-        model
-        (updateLevelClickRabbitWorld model.uiState.rabbit x y)
-
-
-updateLevelClickRabbitWorld : Maybe Rabbit -> Int -> Int -> World -> World
-updateLevelClickRabbitWorld newRabbit x y world =
-    case newRabbit of
-        Nothing ->
-            removeRabbitsAt world x y
-        Just r ->
-            makeWorld
-                world.comment
-                world.blocks
-                (movedRabbit x y r :: world.rabbits)
-                world.things
-                world.metaLines
-
-
-updateLevelClickThing : Model -> Int -> Int -> Model
-updateLevelClickThing model x y =
-    updateModelWorld model (updateLevelClickThingWorld model.uiState.thing x y)
-
-
-updateLevelClickThingWorld :
-    Maybe (Maybe Thing) ->
-    Int ->
-    Int ->
-    World ->
-    World
-updateLevelClickThingWorld maybeNewThing x y world =
+updateLevelClick : Model -> Int -> Int -> Model
+updateLevelClick model x y =
     let
-        newThing : Maybe Thing
-        newThing =
-            case maybeNewThing of
-                Nothing -> Just (Entrance 0 0)
-                Just t -> t
-
-        things : List (Thing)
-        things =
-            case newThing of
+        newWorld : World -> World
+        newWorld w =
+            case model.uiState.item of
                 Nothing ->
-                    List.filter
-                        (\thing -> Thing.pos thing /= (x, y))
-                        world.things
-                Just t ->
-                    Thing.moved x y t :: world.things
+                    changeBlock w x y (Block Earth Flat)
+                Just (BlockItem b) ->
+                    changeBlock w x y b
+                Just (ThingItem t) ->
+                    addThing w (Thing.moved x y t)
+                Just (RabbitItem r) ->
+                    addRabbit w (movedRabbit x y r)
     in
-        makeWorld
-            world.comment
-            world.blocks
-            world.rabbits
-            things
-            world.metaLines
-
-
-updateLevelClickBlock : Model -> Int -> Int -> Model
-updateLevelClickBlock model x y =
-    updateModelWorld model (updateLevelClickBlockWorld model.uiState.block x y)
-
-
-updateLevelClickBlockWorld : Maybe Block -> Int -> Int -> World -> World
-updateLevelClickBlockWorld newBlock x y world =
-    makeWorld
-        world.comment
-        (makeBlockGrid
-            (List.indexedMap
-                (updateLevelClickBlockRow newBlock x y) (blocks world))
-        )
-        world.rabbits
-        world.things
-        world.metaLines
-
-
-updateLevelClickBlockRow :
-    Maybe Block -> Int -> Int -> Int -> List Block -> List Block
-updateLevelClickBlockRow newBlock x y rowy blocks =
-    List.indexedMap (updateLevelClickBlockBlock newBlock x y rowy) blocks
-
-
-updateLevelClickBlockBlock :
-    Maybe Block -> Int -> Int -> Int -> Int -> Block -> Block
-updateLevelClickBlockBlock newBlock x y rowy colx block =
-    if x == colx && y == rowy then
-        case newBlock of
-            Nothing -> Block Earth Flat
-            Just b  -> b
-    else
-        block
+        updateModelWorld model newWorld
 
 
 updateChangeMode : Model -> UiMode -> Model

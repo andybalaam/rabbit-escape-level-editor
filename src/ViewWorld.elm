@@ -28,7 +28,7 @@ import World exposing
 rabbitImg : Flags -> Rabbit -> Html Msg
 rabbitImg flags rabbit =
     img
-        [ src (imagePath flags (rabbitImage (Just rabbit)))
+        [ src (imagePath flags (rabbitImage rabbit))
         , class "thing"
         ]
         []
@@ -37,7 +37,7 @@ rabbitImg flags rabbit =
 thingImg : Flags -> Thing -> Html Msg
 thingImg flags thing =
     img
-        [ src (imagePath flags (thingImage (Just thing)))
+        [ src (imagePath flags (thingImage thing))
         , class "thing"
         ]
         []

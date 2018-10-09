@@ -11,4 +11,4 @@ blockImage block =
         Block Earth BridgeUpRight -> "bridge_rising_right.svg"
         Block Earth BridgeUpLeft  -> "bridge_rising_left.svg"
         Block Metal _             -> "metal_block_1.png"
-        NoBlock                   -> "remove_block.png"
+        NoBlock                   -> ""  -- should not happen

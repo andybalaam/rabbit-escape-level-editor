@@ -1,4 +1,4 @@
-module Model exposing (Model, UiMode(..), UiState, ViewMode(..))
+module Model exposing (Item(..), Model, UiMode(..), UiState, ViewMode(..))
 
 
 import Flags exposing (Flags)
@@ -12,12 +12,8 @@ import World exposing (Block(..), World)
 type UiMode =
       InitialMode
     | CodeMode String
-    | ChooseBlockMode
-    | PlaceBlockMode
-    | ChooseThingMode
-    | PlaceThingMode
-    | ChooseRabbitMode
-    | PlaceRabbitMode
+    | ChooseItemMode
+    | PlaceItemMode
     | DeleteMode
     | ModifyDetailsMode
 
@@ -27,12 +23,16 @@ type ViewMode =
     | FullScreen
 
 
+type Item =
+       BlockItem Block
+     | ThingItem Thing
+     | RabbitItem Rabbit
+
+
 type alias UiState =
     { mode : UiMode
     , viewMode : ViewMode
-    , block : Maybe Block
-    , rabbit : Maybe Rabbit
-    , thing : Maybe (Maybe Thing)
+    , item : Maybe Item
     , newMetaLines : MetaLines.Diff
     , newWorld : Maybe (String, Result ParseErr World)
     }

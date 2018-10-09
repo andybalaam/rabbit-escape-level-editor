@@ -9,7 +9,7 @@ import Expect
 import Flags exposing (Flags)
 import MetaLines
 import Mode exposing (Mode(..))
-import Model exposing (Model, UiMode(..), UiState, ViewMode(..))
+import Model exposing (Item(..), Model, UiMode(..), UiState, ViewMode(..))
 import Msg exposing (Msg(..))
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
@@ -129,8 +129,8 @@ all =
               , "####"
               ]
             , { emptyState
-              | mode = PlaceBlockMode
-              , block = Just (Block Earth UpRight)
+              | mode = PlaceItemMode
+              , item = Just (BlockItem (Block Earth UpRight))
               }
             )
             [ ( (LevelClick 0 1)
@@ -140,8 +140,8 @@ all =
                 , "####"
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpRight)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpRight))
                 }
               )
             ]
@@ -153,8 +153,8 @@ all =
               , "####"
               ]
             , { emptyState
-              | mode = PlaceRabbitMode
-              , rabbit = Just (makeRabbit 0 0 Left)
+              | mode = PlaceItemMode
+              , item = Just (RabbitItem (makeRabbit 0 0 Left))
               }
             )
             [ ( (LevelClick 2 1)
@@ -164,8 +164,8 @@ all =
                 , "####"
                 ]
               , { emptyState
-                | mode = PlaceRabbitMode
-                , rabbit = Just (makeRabbit 0 0 Left)
+                | mode = PlaceItemMode
+                , item = Just (RabbitItem (makeRabbit 0 0 Left))
                 }
               )
             ]
@@ -178,8 +178,8 @@ all =
               , "####"
               ]
             , { emptyState
-              | mode = PlaceThingMode
-              , thing = Just (Just (Entrance 0 0))
+              | mode = PlaceItemMode
+              , item = Just (ThingItem (Entrance 0 0))
               }
             )
             [ ( (LevelClick 1 2)
@@ -189,33 +189,8 @@ all =
                 , "####"
                 ]
               , { emptyState
-                | mode = PlaceThingMode
-                , thing = Just (Just (Entrance 0 0))
-                }
-              )
-            ]
-
-
-        , testActions "Removing a thing"
-            ( [ "####"
-              , "# O#"
-              , "#  #"
-              , "####"
-              ]
-            , { emptyState
-              | mode = PlaceThingMode
-              , thing = Just Nothing
-              }
-            )
-            [ ( (LevelClick 2 1)
-              , [ "####"
-                , "#  #"
-                , "#  #"
-                , "####"
-                ]
-              , { emptyState
-                | mode = PlaceThingMode
-                , thing = Just Nothing
+                | mode = PlaceItemMode
+              , item = Just (ThingItem (Entrance 0 0))
                 }
               )
             ]
@@ -229,7 +204,6 @@ all =
               ]
             , { emptyState
               | mode = DeleteMode
-              , thing = Just Nothing
               }
             )
             [ ( (LevelClick 2 1)
@@ -240,7 +214,6 @@ all =
                 ]
               , { emptyState
                 | mode = DeleteMode
-                , thing = Just Nothing
                 }
               )
             ]
@@ -255,7 +228,6 @@ all =
               ]
             , { emptyState
               | mode = DeleteMode
-              , thing = Just Nothing
               }
             )
             [ ( (LevelClick 2 2)
@@ -266,43 +238,6 @@ all =
                 ]
               , { emptyState
                 | mode = DeleteMode
-                , thing = Just Nothing
-                }
-              )
-            ]
-
-
-        , testActions "Removing a rabbit"
-            ( [ "####"
-              , "# j#"
-              , "# r#"
-              , "####"
-              ]
-            , { emptyState
-              | mode = PlaceRabbitMode
-              , rabbit = Nothing
-              }
-            )
-            [ ( (LevelClick 1 1)  -- Click on nothing
-              , [ "####"
-                , "# j#"
-                , "# r#"
-                , "####"
-                ]
-              , { emptyState
-                | mode = PlaceRabbitMode
-                , rabbit = Nothing
-                }
-              )
-            , ( (LevelClick 2 2)  -- Click the rabbit
-              , [ "####"
-                , "# j#"
-                , "#  #"
-                , "####"
-                ]
-              , { emptyState
-                | mode = PlaceRabbitMode
-                , rabbit = Nothing
                 }
               )
             ]
@@ -316,7 +251,6 @@ all =
               ]
             , { emptyState
               | mode = DeleteMode
-              , rabbit = Nothing
               }
             )
             [ ( (LevelClick 1 1)  -- Click on nothing
@@ -327,7 +261,6 @@ all =
                 ]
               , { emptyState
                 | mode = DeleteMode
-                , rabbit = Nothing
                 }
               )
             , ( (LevelClick 2 2)  -- Click the rabbit
@@ -338,7 +271,6 @@ all =
                 ]
               , { emptyState
                 | mode = DeleteMode
-                , rabbit = Nothing
                 }
               )
             ]
@@ -347,13 +279,13 @@ all =
             ( [ "" ]
             , emptyState
             )
-            [ ( (ChangeMode ChooseBlockMode)
+            [ ( (ChangeMode ChooseItemMode)
               , [ "" ]
-              , { emptyState | mode = ChooseBlockMode }
+              , { emptyState | mode = ChooseItemMode }
               )
-            , ( (ChangeMode ChooseRabbitMode)
+            , ( (ChangeMode PlaceItemMode)
               , [ "" ]
-              , { emptyState | mode = ChooseRabbitMode }
+              , { emptyState | mode = PlaceItemMode }
               )
             ]
 
@@ -403,11 +335,11 @@ all =
             ( [ "" ]
             , emptyState
             )
-            [ ( (ChangeBlock (Block Earth UpRight))
+            [ ( (ChangeItem (BlockItem (Block Earth UpRight)))
               , [ "" ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpRight)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpRight))
                 }
               )
             ]
@@ -416,11 +348,11 @@ all =
             ( [ "" ]
             , emptyState
             )
-            [ ( (ChangeRabbit (Just (makeRabbit 0 0 Left)))
+            [ ( (ChangeItem (RabbitItem (makeRabbit 0 0 Left)))
               , [ "" ]
               , { emptyState
-                | mode = PlaceRabbitMode
-                , rabbit = Just (makeRabbit 0 0 Left)
+                | mode = PlaceItemMode
+                , item = Just (RabbitItem (makeRabbit 0 0 Left))
                 }
               )
             ]
@@ -459,13 +391,13 @@ all =
                 ]
               , emptyState
               )
-            , ( (ChangeBlock (Block Earth UpRight))
+            , ( (ChangeItem (BlockItem (Block Earth UpRight)))
               , [ "  #"
                 , "   "
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpRight)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpRight))
                 }
               )
             , ( Undo
@@ -473,8 +405,8 @@ all =
                 , "   "  -- but the mode and block stay selected.
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpRight)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpRight))
                 }
               )
             ]
@@ -657,13 +589,13 @@ all =
                 ]
               , emptyState
               )
-            , ( (ChangeBlock (Block Earth UpRight))
+            , ( (ChangeItem (BlockItem (Block Earth UpRight)))
               , [ "///"
                 , "   "
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpRight)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpRight))
                 }
               )
             , ( Redo
@@ -671,17 +603,17 @@ all =
                 , "  #"
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpRight)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpRight))
                 }
               )
-            , ( (ChangeBlock (Block Earth UpLeft))
+            , ( (ChangeItem (BlockItem (Block Earth UpLeft)))
               , [ "///"
                 , "  #"
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpLeft)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpLeft))
                 }
               )
             , ( Undo
@@ -689,17 +621,17 @@ all =
                 , "   "
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just (Block Earth UpLeft)
+                | mode = PlaceItemMode
+                , item = Just (BlockItem (Block Earth UpLeft))
                 }
               )
-            , ( (ChangeBlock NoBlock)
+            , ( (ChangeItem (BlockItem NoBlock))
               , [ "///"
                 , "   "
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just NoBlock
+                | mode = PlaceItemMode
+                , item = Just (BlockItem NoBlock)
                 }
               )
             , ( Redo
@@ -707,8 +639,8 @@ all =
                 , "  #"
                 ]
               , { emptyState
-                | mode = PlaceBlockMode
-                , block = Just NoBlock
+                | mode = PlaceItemMode
+                , item = Just (BlockItem NoBlock)
                 }
               )
             ]
@@ -924,9 +856,7 @@ emptyState : UiState
 emptyState =
     { mode = InitialMode
     , viewMode = Normal
-    , block = Nothing
-    , rabbit = Nothing
-    , thing = Nothing
+    , item = Nothing
     , newMetaLines = MetaLines.emptyDiff
     , newWorld = Nothing
     }

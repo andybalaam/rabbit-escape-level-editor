@@ -10,6 +10,7 @@ module WorldParser exposing
     , parseErrToString
     , makeStarLine
     , starLineToItems
+    , stringRemoveLastIfEmpty
     , toCharItem
     )
 
@@ -455,6 +456,11 @@ removeLastIfEmpty lines =
 split : String -> List String
 split s =
     removeLastIfEmpty (String.lines s)
+
+
+stringRemoveLastIfEmpty : String -> String
+stringRemoveLastIfEmpty s =
+    String.join "\n" (split s)
 
 
 isStarLine : Line -> Bool

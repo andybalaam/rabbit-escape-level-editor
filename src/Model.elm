@@ -40,7 +40,7 @@ type alias UiState =
 
 type alias Model =
     { flags : Flags
-    , world : Result ParseErr World
+    , world : Result (ParseErr, String) World
     , uiState : UiState
     , t : String -> String
     , past : List World

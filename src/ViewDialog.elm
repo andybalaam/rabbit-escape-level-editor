@@ -122,12 +122,15 @@ chooseItemButtons model =
     }
 
 
-codeText : Model -> World -> String -> Contents
-codeText model world initialCode =
+codeText : Model -> String -> Contents
+codeText model initialCode =
     let
         (code, parsed) =
             case model.uiState.newWorld of
-                Nothing -> (initialCode, Ok world)
+                Nothing ->
+                    case model.world of
+                       Ok world -> (initialCode, Ok world)
+                       Err (e, w) -> (w, Err e)
                 Just x -> x
 
         (parseError, canUpdate) =
@@ -136,48 +139,53 @@ codeText model world initialCode =
                 Err e -> (parseErrToString e, False)
 
     in
-        { visible =
-            True
-        , dialogStyles =
-            [ style "display" "grid"
-            , style "grid-template-rows" "3em 3em 3fr 1fr"
-            ]
-        , items =
-            [ tp model
-                (  "Copy this code and paste it somewhere to save. Paste it into "
-                ++ "Rabbit Escape to play it."
+        codeTextContents model code canUpdate parseError
+
+
+codeTextContents : Model -> String -> Bool -> String -> Contents
+codeTextContents model code canUpdate parseError =
+    { visible =
+        True
+    , dialogStyles =
+        [ style "display" "grid"
+        , style "grid-template-rows" "3em 3em 3fr 1fr"
+        ]
+    , items =
+        [ tp model
+            (  "Copy this code and paste it somewhere to save. Paste it into "
+            ++ "Rabbit Escape to play it."
+            )
+            []
+        , p
+            []
+            [ button
+                [ class "dialogSubmit"
+                , onClick (ChangeMode InitialMode) -- TODO
+                ]
+                [ text "Cancel" ]
+            , button
+                ( [ class "dialogSubmit"
+                    , onClick ChangeCode
+                  ]
+                ++ if canUpdate then [] else [ disabled True ]
                 )
-                []
-            , p
-                []
-                [ button
-                    [ class "dialogSubmit"
-                    , onClick (ChangeMode InitialMode) -- TODO
-                    ]
-                    [ text "Cancel" ]
-                , button
-                    ( [ class "dialogSubmit"
-                        , onClick ChangeCode
-                      ]
-                    ++ if canUpdate then [] else [ disabled True ]
-                    )
-                    [ text "Update" ]
-                ]
-            , textarea
-                [ id "code"
-                , onInput CodeInput
-                , spellcheck False
-                ]
-                [ text code
-                ]
-            , textarea
-                [ id "errors"
-                , readonly True
-                , spellcheck False
-                ]
-                [ text parseError ]
+                [ text "Update" ]
             ]
-        }
+        , textarea
+            [ id "code"
+            , onInput CodeInput
+            , spellcheck False
+            ]
+            [ text code
+            ]
+        , textarea
+            [ id "errors"
+            , readonly True
+            , spellcheck False
+            ]
+            [ text parseError ]
+        ]
+    }
 
 
 metaLineBoxes
@@ -295,12 +303,29 @@ drawDialog contents =
         ]
 
 
-viewDialog : Model -> World -> List (Html Msg)
-viewDialog model world =
+parseErrDialog : String -> Contents
+parseErrDialog errString =
+    { visible =
+        True
+    , dialogStyles =
+        []
+    , items =
+        [ div
+            [ class "view-parse-err" ]
+            [ text errString ]
+        ]
+    }
+
+
+viewDialog : Model -> List (Html Msg)
+viewDialog model =
     drawDialog
         ( case model.uiState.mode of
             ChooseItemMode    -> chooseItemButtons model
-            CodeMode code     -> codeText model world code
-            ModifyDetailsMode -> modifyDetailsControls model world
+            CodeMode code     -> codeText model code
+            ModifyDetailsMode ->
+                case model.world of
+                    Ok world -> modifyDetailsControls model world
+                    Err (e, _) -> parseErrDialog (parseErrToString e)
             other             -> invisible
         )

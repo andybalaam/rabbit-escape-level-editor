@@ -7,6 +7,7 @@ import Json.Encode as E
 import MetaLines exposing (MetaLines)
 import Model exposing (Item(..), Model, UiMode(..), ViewMode(..))
 import Msg exposing (Msg(..))
+import ParseErr exposing (ParseErr)
 import Ports exposing (saveAndQuit)
 import Rabbit exposing (Rabbit, movedRabbit)
 import Thing exposing (Thing(..))
@@ -35,7 +36,7 @@ update msg model =
                 w =
                     case model.world of
                         Ok world -> WorldTextRender.render world
-                        _ -> ""
+                        Err (_, txt) -> txt
             in
                 (model, saveAndQuit (E.string w))
         _->
@@ -135,26 +136,24 @@ updateChangeItem model item =
 
 updateChangeCode : Model -> Model
 updateChangeCode model =
-    case model.world of
-        Err _ ->
-            model
-        Ok w ->
-            let
-                uiState = model.uiState
-                world =
-                    uiState.newWorld
-                        |> Maybe.withDefault ("", Ok w)
-                        |> Tuple.second
-                        |> Result.withDefault w
-            in
-                { model
-                | world = Ok world
-                , uiState =
-                    { uiState
-                    | newWorld = Nothing
-                    , mode = InitialMode
-                    }
-                }
+    let
+        changedWorld : Result (ParseErr, String) World
+        changedWorld =
+            case uiState.newWorld of
+                Just (_, Ok w) -> Ok w
+                Just (_, Err e) -> Err (e, "")
+                Nothing -> model.world
+
+        uiState = model.uiState
+    in
+        { model
+        | world = changedWorld
+        , uiState =
+            { uiState
+            | newWorld = Nothing
+            , mode = InitialMode
+            }
+        }
 
 
 updateToggleFullScreen : Model -> Model

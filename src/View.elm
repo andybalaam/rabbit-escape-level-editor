@@ -24,23 +24,13 @@ view model =
     div
         [ class "level-editor-main"
         ]
-        ( case model.world of
-            Ok w ->
-                ( case model.flags.mode of
-                    Edit ->
-                        (
-                            [ (viewToolbar model)
-                            , (viewWorkspace model.flags model.uiState w)
-                            ] ++ (viewDialog model w)
-                        )
-                    View ->
-                        [ viewWorkspace model.flags model.uiState w ]
+        ( case model.flags.mode of
+            Edit ->
+                (
+                    [ (viewToolbar model)
+                    , (viewWorkspace model.flags model.uiState model.world)
+                    ] ++ (viewDialog model)
                 )
-            Err e ->
-                [
-                    ( div
-                        [ class "view-parse-err" ]
-                        [ text (parseErrToString e) ]
-                    )
-                ]
+            View ->
+                [ viewWorkspace model.flags model.uiState model.world ]
         )

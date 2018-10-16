@@ -39,6 +39,7 @@ import WorldParser exposing
     , parseErrToString
     , makeStarLine
     , starLineToItems
+    , stringRemoveLastIfEmpty
     , toCharItem
     )
 
@@ -49,6 +50,7 @@ all =
         [ test "Combining good items make a good list" combiningGood
         , test "Combining a bad items makes a bad result" combiningBad
         , test "Combining no items makes a good empty list" combiningNone
+        , test "Empty last line is removed" emptyLastLineIsRemoved
         , test "Parse empty world" parseEmptyWorld
         , test "Parse world with blocks" parseWorldWithBlocks
         , test "Parse world with rabbits" parseWorldWithRabbits
@@ -97,6 +99,17 @@ uprErth =
 fltMetl : Block
 fltMetl =
     Block Metal Flat
+
+
+-- stringRemoveLastIfEmpty --
+
+
+emptyLastLineIsRemoved : () -> Expect.Expectation
+emptyLastLineIsRemoved =
+    \() ->
+        Expect.equal
+            "a\nb"
+            (stringRemoveLastIfEmpty "a\nb\n")
 
 
 -- Combine --

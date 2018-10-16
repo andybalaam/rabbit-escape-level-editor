@@ -9,6 +9,7 @@ import MetaLines
 import Mode exposing (Mode(..))
 import Model exposing (Model, UiMode(..), UiState, ViewMode(..))
 import Msg exposing (Msg(..))
+import ParseErr exposing (ParseErr)
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
 import Update exposing (update)
 import View exposing (view)
@@ -20,7 +21,7 @@ import World exposing
     , makeBlockGrid
     , makeWorld
     )
-import WorldParser exposing (parse)
+import WorldParser exposing (parse, stringRemoveLastIfEmpty)
 import WorldTextRender exposing (render)
 
 
@@ -31,10 +32,28 @@ translationPlaceholder x =
 
 initModel : Flags -> String -> Model
 initModel flags initialWorldText =
+    case WorldParser.parse "" initialWorldText of
+        Ok w ->
+            initModelRecord
+                flags
+                (Ok w)
+                InitialMode
+        Err e ->
+            let
+                badWorldText = (stringRemoveLastIfEmpty initialWorldText)
+            in
+                initModelRecord
+                    flags
+                    (Err (e, badWorldText))
+                    (CodeMode badWorldText)
+
+
+initModelRecord : Flags -> Result (ParseErr, String) World -> UiMode -> Model
+initModelRecord flags world mode =
     { flags = flags
-    , world = WorldParser.parse "" initialWorldText
+    , world = world
     , uiState =
-        { mode = InitialMode
+        { mode = mode
         , viewMode = Normal
         , item = Nothing
         , newMetaLines = MetaLines.emptyDiff

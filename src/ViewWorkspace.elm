@@ -1,6 +1,6 @@
 module ViewWorkspace exposing (viewWorkspace)
 
-import Html exposing (Html, button, div)
+import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (alt, class, id, src, style)
 import Html.Events exposing (onClick)
 
@@ -9,8 +9,10 @@ import Flags exposing (Flags)
 import Mode exposing (Mode(..))
 import Model exposing (UiState, ViewMode(..))
 import Msg exposing (Msg(..))
+import ParseErr exposing (ParseErr)
 import ViewWorld exposing (viewWorld)
 import World exposing (World)
+import WorldParser exposing (parseErrToString)
 
 
 
@@ -36,8 +38,22 @@ fullScreenButton uiState flags =
         []
 
 
-viewWorkspace : Flags -> UiState -> World -> Html Msg
+viewWorkspace : Flags -> UiState -> Result (ParseErr, String) World -> Html Msg
 viewWorkspace flags uiState world =
+    case world of
+        Ok w -> viewWorkspaceWorld flags uiState w
+        Err (e, _) -> viewWorkspaceError (parseErrToString e)
+
+
+viewWorkspaceError : String -> Html Msg
+viewWorkspaceError errString =
+    div
+        [ class "view-parse-err" ]
+        [ text errString ]
+
+
+viewWorkspaceWorld : Flags -> UiState -> World -> Html Msg
+viewWorkspaceWorld flags uiState world =
     div
         (
             [ id

@@ -331,6 +331,21 @@ all =
               )
             ]
 
+        , testActions "Can update code even when world is broken"
+            ( [ "#r#", "##" ]
+            , { emptyState
+              | newWorld =
+                Just ("#" , parse "" "#")
+              }
+            )
+            [ ( ChangeCode
+              , [ "#" ]
+              , { emptyState
+                | mode = InitialMode
+                }
+              )
+            ]
+
         , testActions "Choosing a block updates block and mode"
             ( [ "" ]
             , emptyState
@@ -768,9 +783,14 @@ all =
         ]
 
 
-parseLines : List String -> Result ParseErr World
+parseLines : List String -> Result (ParseErr, String) World
 parseLines textLines =
-    parse "" (String.join "\n" textLines)
+    let
+        txt = (String.join "\n" textLines)
+    in
+        case parse "" txt of
+            Ok w -> Ok w
+            Err e -> Err (e, txt)
 
 
 blankFlags : Flags

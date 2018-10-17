@@ -84,7 +84,7 @@ html
     z-index: 0;
 }
 
-#view-workspace.fullscreen
+.fullscreen
 {
     position: fixed;
     top: 0px;
@@ -92,6 +92,7 @@ html
     right: 0px;
     bottom: 0px;
     z-index: 1001;
+    background: white;
 }
 
 button.toggle-fullscreen

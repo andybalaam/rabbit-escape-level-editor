@@ -55,20 +55,12 @@ viewWorkspaceError errString =
 viewWorkspaceWorld : Flags -> UiState -> World -> Html Msg
 viewWorkspaceWorld flags uiState world =
     div
-        (
-            [ id
-                ( case flags.mode of
-                    Edit -> "edit-workspace"
-                    View -> "view-workspace"
-                )
-            ]
-            ++ (
-                if uiState.viewMode == FullScreen then
-                    [ class "fullscreen" ]
-                else
-                    []
+        [ id
+            ( case flags.mode of
+                Edit -> "edit-workspace"
+                View -> "view-workspace"
             )
-        )
+        ]
         (
             ( case flags.mode of
                 Edit -> []

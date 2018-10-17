@@ -15,6 +15,7 @@ import MetaLines exposing (MetaValue(..))
 import Model exposing (Model)
 import Msg exposing (Msg)
 import World exposing (World)
+import Rabbit exposing (Rabbit, RabbitType(..))
 
 
 allAbilities =
@@ -72,9 +73,18 @@ numToSave world =
     zeroIfMissing world "num_to_save"
 
 
+numNormalRabbits : List Rabbit -> Int
+numNormalRabbits rabbits =
+    List.length
+        ( List.filter
+            (\r -> r.typ == Normal)
+            rabbits
+        )
+
+
 numRabbits : World -> Int
 numRabbits world =
-    (zeroIfMissing world "num_rabbits") + (List.length world.rabbits)
+    (zeroIfMissing world "num_rabbits") + (numNormalRabbits world.rabbits)
 
 
 toSaveText : Model -> List (Html Msg)

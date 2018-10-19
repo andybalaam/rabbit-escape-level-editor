@@ -297,6 +297,18 @@ hasThing x y world =
     List.any (\t -> Thing.pos t == (x, y)) world.things
 
 
+changeOrToggleBlock : World -> Int -> Int -> Block -> World
+changeOrToggleBlock w x y block =
+    let
+        actualBlock =
+            if World.blockAt w x y == Just block then
+                NoBlock
+            else
+                block
+    in
+        changeBlock w x y actualBlock
+
+
 updateLevelClick : Model -> Int -> Int -> Model
 updateLevelClick model x y =
     let
@@ -304,9 +316,9 @@ updateLevelClick model x y =
         newWorld w =
             case model.uiState.item of
                 Nothing ->
-                    changeBlock w x y (Block Earth Flat)
+                    changeOrToggleBlock w x y (Block Earth Flat)
                 Just (BlockItem b) ->
-                    changeBlock w x y b
+                    changeOrToggleBlock w x y b
                 Just (ThingItem t) ->
                     addThing w (Thing.moved x y t)
                 Just (RabbitItem r) ->

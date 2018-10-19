@@ -50,6 +50,52 @@ all =
             ]
 
 
+        , testActions "Clicking square with block replaces it"
+            ( [ "####"
+              , "#  #"
+              , "# r#"
+              , "####"
+              ]
+            , { emptyState
+              | item = Just (BlockItem (Block Earth UpRight))
+              }
+            )
+            [ ( (LevelClick 0 0)
+              , [ "/###"
+                , "#  #"
+                , "# r#"
+                , "####"
+                ]
+              , { emptyState
+                | item = Just (BlockItem (Block Earth UpRight))
+                }
+              )
+            ]
+
+
+        , testActions "Replacing a block with itself removes it"
+            ( [ "/###"
+              , "#  #"
+              , "# r#"
+              , "####"
+              ]
+            , { emptyState
+              | item = Just (BlockItem (Block Earth UpRight))
+              }
+            )
+            [ ( (LevelClick 0 0)
+              , [ " ###"
+                , "#  #"
+                , "# r#"
+                , "####"
+                ]
+              , { emptyState
+                | item = Just (BlockItem (Block Earth UpRight))
+                }
+              )
+            ]
+
+
         , testActions "Removing a block with delete"
             ( [ "####"
               , "#  #"

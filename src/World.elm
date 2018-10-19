@@ -6,6 +6,7 @@ module World exposing
     , World
     , addThing
     , addRabbit
+    , blockAt
     , blocks
     , changeBlock
     , makeBlockGrid
@@ -101,6 +102,16 @@ rabbitsAt world x y =
 thingsAt : World -> Int -> Int -> List Thing
 thingsAt world x y =
     List.filter (\t -> Thing.pos t == (x, y)) world.things
+
+
+blockAt : World -> Int -> Int -> Maybe Block
+blockAt w x y =
+    let
+        bs = blocks w
+    in
+        case List.head (List.drop y bs) of
+            Just row -> List.head (List.drop x row)
+            _ -> Nothing
 
 
 -- Return a world identical to the one supplied except

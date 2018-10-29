@@ -1,6 +1,6 @@
 module ThingImage exposing (thingImage)
 
-import Thing exposing (Thing(..), TokenType(..))
+import Thing exposing (Thing(..), TokenType(..), WaterContents(..))
 
 
 thingImage : Thing -> String
@@ -16,3 +16,5 @@ thingImage thing =
         Token Climb _ _   -> "token_climb.svg"
         Token Explode _ _ -> "token_explode.svg"
         Token Brolly _ _  -> "token_brolly.svg"
+        WaterRegion _ _ Full -> "water_full.svg"
+        WaterRegion _ _ Half -> "water_half.svg"

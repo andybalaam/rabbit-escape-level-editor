@@ -6,7 +6,7 @@ import Expect
 
 import MetaLines exposing (MetaLines, MetaValue(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit, makeRabbot)
-import Thing exposing (Thing(..))
+import Thing exposing (Thing(..), WaterContents(..))
 import World exposing
     ( World
     , Block(..)
@@ -136,6 +136,22 @@ all =
             , "/"
             , ":num_rabbits=4"
             , ":num_to_save=2"
+            ]
+
+
+        , t "Render water"
+            [ [NoBlock, NoBlock]
+            , [NoBlock, uprErth]
+            ]
+            []
+            [ WaterRegion 0 0 Full
+            , WaterRegion 1 0 Half
+            , WaterRegion 1 1 Half
+            ]
+            MetaLines.defaults
+            [ "Nn"
+            , " *"
+            , ":*=/n"
             ]
         ]
 

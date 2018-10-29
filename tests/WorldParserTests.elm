@@ -18,7 +18,7 @@ import Item2Text exposing (CharItem(..))
 import MetaLines exposing (MetaLines, MetaValue(..))
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
-import Thing exposing (Thing(..))
+import Thing exposing (Thing(..), WaterContents(..))
 import World exposing
     ( World
     , Block(..)
@@ -857,5 +857,23 @@ metaLineCases =
                         [ ("num_rabbits", MvInt 3)
                         , ("num_to_save", MvInt 2)
                         ]
+                }
+
+            , t "Water"
+                [ " Nn"
+                , "*  "
+                , ":*=/n"
+                ]
+                { blocks =
+                    [ [NoBlock, NoBlock, NoBlock]
+                    , [uprErth, NoBlock, NoBlock]
+                    ]
+                , rabbits = []
+                , things =
+                    [ WaterRegion 1 0 Full
+                    , WaterRegion 2 0 Half
+                    , WaterRegion 0 1 Half
+                    ]
+                , metaLines = MetaLines.defaults
                 }
             ]

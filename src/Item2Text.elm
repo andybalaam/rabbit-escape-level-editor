@@ -21,7 +21,7 @@ import Rabbit exposing
     , makeRabbot
     )
 
-import Thing exposing (Thing(..), TokenType(..))
+import Thing exposing (Thing(..), TokenType(..), WaterContents(..))
 
 import World exposing
     ( Block(..)
@@ -91,6 +91,8 @@ thingToChar thing =
         Token Climb _ _ -> 'c'
         Token Explode _ _ -> 'p'
         Token Brolly _ _ -> 'l'
+        WaterRegion _ _ Full -> 'N'
+        WaterRegion _ _ Half -> 'n'
 
 
 charToThing : Char -> Maybe Thing
@@ -106,6 +108,8 @@ charToThing char =
         'c' -> Just (Token Climb 0 0)
         'p' -> Just (Token Explode 0 0)
         'l' -> Just (Token Brolly 0 0)
+        'N' -> Just (WaterRegion 0 0 Full)
+        'n' -> Just (WaterRegion 0 0 Half)
         _ -> Nothing
 
 

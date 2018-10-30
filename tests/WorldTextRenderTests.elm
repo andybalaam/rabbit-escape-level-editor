@@ -153,6 +153,21 @@ all =
             , " *"
             , ":*=/n"
             ]
+
+
+        , t "Render pipe"
+            [ [NoBlock, NoBlock]
+            , [NoBlock, uprErth]
+            ]
+            []
+            [ Pipe 1 0
+            , Pipe 1 1
+            ]
+            MetaLines.defaults
+            [ " P"
+            , " *"
+            , ":*=/P"
+            ]
         ]
 
 

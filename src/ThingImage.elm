@@ -18,3 +18,4 @@ thingImage thing =
         Token Brolly _ _  -> "token_brolly.svg"
         WaterRegion _ _ Full -> "water_full.svg"
         WaterRegion _ _ Half -> "water_half.svg"
+        Pipe _ _ -> "pipe.png"

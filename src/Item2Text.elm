@@ -93,6 +93,7 @@ thingToChar thing =
         Token Brolly _ _ -> 'l'
         WaterRegion _ _ Full -> 'N'
         WaterRegion _ _ Half -> 'n'
+        Pipe _ _ -> 'P'
 
 
 charToThing : Char -> Maybe Thing
@@ -110,6 +111,7 @@ charToThing char =
         'l' -> Just (Token Brolly 0 0)
         'N' -> Just (WaterRegion 0 0 Full)
         'n' -> Just (WaterRegion 0 0 Half)
+        'P' -> Just (Pipe 0 0)
         _ -> Nothing
 
 

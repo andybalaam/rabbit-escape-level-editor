@@ -876,4 +876,21 @@ metaLineCases =
                     ]
                 , metaLines = MetaLines.defaults
                 }
+
+            , t "Pipe"
+                [ "  P"
+                , "*  "
+                , ":*=/P"
+                ]
+                { blocks =
+                    [ [NoBlock, NoBlock, NoBlock]
+                    , [uprErth, NoBlock, NoBlock]
+                    ]
+                , rabbits = []
+                , things =
+                    [ Pipe 2 0
+                    , Pipe 0 1
+                    ]
+                , metaLines = MetaLines.defaults
+                }
             ]

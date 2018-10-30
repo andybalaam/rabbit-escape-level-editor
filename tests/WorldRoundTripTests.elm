@@ -63,6 +63,16 @@ all =
                 ]
             )
 
+        , test "Water"
+            ( roundTrips
+                [ "NnP"
+                , "***"
+                , ":*=)NP"
+                , ":*=(n"
+                , ":*=bn"
+                ]
+            )
+
         ]
 
 

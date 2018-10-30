@@ -7,6 +7,7 @@ type Thing =
     | Fire Int Int
     | Token TokenType Int Int
     | WaterRegion Int Int WaterContents
+    | Pipe Int Int
 
 
 type TokenType =
@@ -32,6 +33,7 @@ pos thing =
         Fire x y -> (x, y)
         Token _ x y -> (x, y)
         WaterRegion x y _ -> (x, y)
+        Pipe x y -> (x, y)
 
 
 moved : Int -> Int -> Thing -> Thing
@@ -42,3 +44,4 @@ moved x y thing =
         Fire _ _ -> Fire x y
         Token tokenType _ _  -> Token tokenType x y
         WaterRegion _ _ contents -> WaterRegion x y contents
+        Pipe _ _ -> Pipe x y

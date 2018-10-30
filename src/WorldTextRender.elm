@@ -6,6 +6,7 @@ import MetaLines exposing
     ( MetaLines
     , MetaValue(..)
     )
+import WaterLines exposing (WaterLines(..))
 import World exposing (Block, Grid(..), World, blocks, rabbitsAt, thingsAt)
 
 
@@ -28,6 +29,18 @@ renderMetaLines world =
     List.map renderMetaLine (MetaLines.toNonDefaultStringList world.metaLines)
 
 
+renderWaterLines : World -> List String
+renderWaterLines world =
+    let
+        renderWaterLine : String -> String
+        renderWaterLine waterLine =
+            waterLine
+    in
+        case world.waterLines of
+            WaterLines lines ->
+                List.map renderWaterLine lines
+
+
 render : World -> String
 render world =
     let
@@ -39,6 +52,7 @@ render world =
             (  List.map Tuple.first lines
             ++ ( List.map renderStarLine allStarLines )
             ++ renderMetaLines world
+            ++ renderWaterLines world
             )
 
 

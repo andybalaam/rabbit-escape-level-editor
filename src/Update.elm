@@ -275,6 +275,7 @@ removeRabbitsAt world x y =
         (List.filter (\r -> r.x /= x || r.y /= y) world.rabbits)
         world.things
         world.metaLines
+        world.waterLines
 
 
 removeThingsAt : World -> Int -> Int -> World
@@ -285,6 +286,7 @@ removeThingsAt world x y =
         world.rabbits
         (List.filter (\t -> Thing.pos t /= (x, y)) world.things)
         world.metaLines
+        world.waterLines
 
 
 hasRabbit : Int -> Int -> World -> Bool
@@ -376,6 +378,7 @@ updateAddColumn model =
                         w.rabbits
                         w.things
                         w.metaLines
+                        w.waterLines
                     )
             }
 
@@ -414,6 +417,7 @@ updateWorldRemoveColumn world =
             ( List.filter lastColRabbit world.rabbits )
             ( List.filter lastColThing world.things )
             world.metaLines
+            world.waterLines
 
 
 updateAddRow : Model -> Model
@@ -438,6 +442,7 @@ updateWorldAddRow world =
             world.rabbits
             world.things
             world.metaLines
+            world.waterLines
 
 
 updateRemoveRow : Model -> Model
@@ -466,3 +471,4 @@ updateWorldRemoveRow world =
             ( List.filter lastRowRabbit world.rabbits )
             ( List.filter lastRowThing world.things )
             world.metaLines
+            world.waterLines

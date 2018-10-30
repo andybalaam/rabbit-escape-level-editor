@@ -7,6 +7,7 @@ import Expect
 import MetaLines exposing (MetaLines, MetaValue(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit, makeRabbot)
 import Thing exposing (Thing(..), WaterContents(..))
+import WaterLines exposing (WaterLines(..))
 import World exposing
     ( World
     , Block(..)
@@ -25,7 +26,7 @@ all =
             [ [NoBlock, NoBlock, NoBlock]
             , [NoBlock, NoBlock, NoBlock]
             , [NoBlock, NoBlock, NoBlock]
-            ] [] [] MetaLines.defaults
+            ] [] [] MetaLines.defaults (WaterLines [])
             [ "   "
             , "   "
             , "   "
@@ -36,7 +37,7 @@ all =
             , [NoBlock, NoBlock, NoBlock, fltErth]
             , [NoBlock, NoBlock, NoBlock, NoBlock]
             , [fltErth, fltErth, fltErth, fltErth]
-            ] [] [] MetaLines.defaults
+            ] [] [] MetaLines.defaults (WaterLines [])
             [ "    "
             , "   #"
             , "    "
@@ -53,7 +54,7 @@ all =
             , makeRabbot 0 0 Left
             , makeRabbit 2 1 Right
             , makeRabbit 1 2 Left
-            ] [] MetaLines.defaults
+            ] [] MetaLines.defaults (WaterLines [])
             [ "y   "
             , "t r#"
             , " j  "
@@ -75,6 +76,7 @@ all =
             , Exit 3 0
             ]
             MetaLines.defaults
+            (WaterLines [])
             [ "yQ O"
             , "t r#"
             , " j  "
@@ -89,7 +91,7 @@ all =
             ]
             [ makeRabbit 2 1 Right
             , makeRabbit 2 1 Left
-            ] [] MetaLines.defaults
+            ] [] MetaLines.defaults (WaterLines [])
             [ "    "
             , "  * "
             , "    "
@@ -112,6 +114,7 @@ all =
             , Exit 3 1
             ]
             MetaLines.defaults
+            (WaterLines [])
             [ "    "
             , "  **"
             , "*   "
@@ -132,6 +135,7 @@ all =
                 , ("num_to_save", MvInt 2)
                 ]
             )
+            (WaterLines [])
             [ " "
             , "/"
             , ":num_rabbits=4"
@@ -149,6 +153,7 @@ all =
             , WaterRegion 1 1 Half
             ]
             MetaLines.defaults
+            (WaterLines [])
             [ "Nn"
             , " *"
             , ":*=/n"
@@ -164,9 +169,23 @@ all =
             , Pipe 1 1
             ]
             MetaLines.defaults
+            (WaterLines [])
             [ " P"
             , " *"
             , ":*=/P"
+            ]
+
+
+        , t "Render water amounts"
+            [ [NoBlock]
+            ]
+            []
+            []
+            MetaLines.defaults
+            (WaterLines [":n=2,3,150", ":n=0,0,133"])
+            [ " "
+            , ":n=2,3,150"
+            , ":n=0,0,133"
             ]
         ]
 
@@ -199,10 +218,18 @@ rend
     -> List Rabbit
     -> List Thing
     -> MetaLines
+    -> WaterLines
     -> List String
-rend blocks rabbits things metaLines =
+rend blocks rabbits things metaLines waterLines =
     renderToLines
-        (makeWorld "tst" (makeBlockGrid blocks) rabbits things metaLines)
+        ( makeWorld
+            "tst"
+            (makeBlockGrid blocks)
+            rabbits
+            things
+            metaLines
+            waterLines
+        )
 
 
 t
@@ -211,11 +238,13 @@ t
     -> List Rabbit
     -> List Thing
     -> MetaLines
+    -> WaterLines
     -> List String
     -> Test
-t desc blocks rabbits things metaLines expected =
+t desc blocks rabbits things metaLines waterLines expected =
     test
         desc
         ( \() ->
-            Expect.equal expected (rend blocks rabbits things metaLines)
+            Expect.equal
+                expected (rend blocks rabbits things metaLines waterLines)
         )

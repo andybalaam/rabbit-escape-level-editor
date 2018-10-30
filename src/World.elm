@@ -20,6 +20,7 @@ module World exposing
 import MetaLines exposing (MetaLines)
 import Rabbit exposing (Rabbit)
 import Thing exposing (Thing)
+import WaterLines exposing (WaterLines)
 
 
 type BlockMaterial =
@@ -44,6 +45,7 @@ type alias World =
     , rabbits : List Rabbit
     , things : List Thing
     , metaLines : MetaLines
+    , waterLines : WaterLines
     }
 
 
@@ -62,13 +64,15 @@ makeWorld :
     List Rabbit ->
     List Thing ->
     MetaLines ->
+    WaterLines ->
     World
-makeWorld comment blocksGrid rabbits things metaLines =
+makeWorld comment blocksGrid rabbits things metaLines waterLines =
     { comment = comment
     , blocks = blocksGrid
     , rabbits = rabbits
     , things = things
     , metaLines = metaLines
+    , waterLines = waterLines
     }
 
 
@@ -142,6 +146,7 @@ changeBlock world x y block =
             world.rabbits
             world.things
             world.metaLines
+            world.waterLines
 
 
 addThing : World -> Thing -> World
@@ -152,6 +157,7 @@ addThing world thing =
         world.rabbits
         (thing :: world.things)
         world.metaLines
+        world.waterLines
 
 
 addRabbit : World -> Rabbit -> World
@@ -162,3 +168,4 @@ addRabbit world rabbit =
         (rabbit :: world.rabbits)
         world.things
         world.metaLines
+        world.waterLines

@@ -19,6 +19,7 @@ import MetaLines exposing (MetaLines, MetaValue(..))
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
 import Thing exposing (Thing(..), WaterContents(..))
+import WaterLines exposing (WaterLines(..))
 import World exposing
     ( World
     , Block(..)
@@ -514,6 +515,7 @@ parseEmptyWorld =
             []
             []
             MetaLines.defaults
+            (WaterLines [])
         )
 
 
@@ -540,6 +542,7 @@ parseWorldWithBlocks =
             []
             []
             MetaLines.defaults
+            (WaterLines [])
         )
 
 
@@ -574,6 +577,7 @@ parseWorldWithRabbits =
                 , ( "description", MvString "copious" )
                 ]
             )
+            (WaterLines [])
         )
 
 
@@ -612,6 +616,7 @@ parseWorldWithThings =
                 , ( "block", MvInt 2 )
                 ]
             )
+            (WaterLines [])
         )
 
 
@@ -684,6 +689,7 @@ parseOverlappingRabbits =
                 [ ( "name", MvString "bar" )
                 ]
             )
+            (WaterLines [])
         )
 
 
@@ -721,6 +727,7 @@ parseMultipleStars =
             , Exit 2 1
             ]
             MetaLines.defaults
+            (WaterLines [])
         )
 
 
@@ -802,6 +809,7 @@ type alias Defn =
     , rabbits : List Rabbit
     , things : List Thing
     , metaLines : MetaLines
+    , waterLines : WaterLines
     }
 
 
@@ -826,6 +834,7 @@ metaLineCases =
                                 defn.rabbits
                                 defn.things
                                 defn.metaLines
+                                defn.waterLines
                             )
                         )
                 )
@@ -838,6 +847,7 @@ metaLineCases =
                 , rabbits = []
                 , things = []
                 , metaLines = MetaLines.fromList [("num_rabbits", MvInt 3)]
+                , waterLines = WaterLines []
                 }
 
             , t "Meta-line with grid"
@@ -857,6 +867,7 @@ metaLineCases =
                         [ ("num_rabbits", MvInt 3)
                         , ("num_to_save", MvInt 2)
                         ]
+                , waterLines = WaterLines []
                 }
 
             , t "Water"
@@ -875,6 +886,7 @@ metaLineCases =
                     , WaterRegion 0 1 Half
                     ]
                 , metaLines = MetaLines.defaults
+                , waterLines = WaterLines []
                 }
 
             , t "Pipe"
@@ -892,5 +904,20 @@ metaLineCases =
                     , Pipe 0 1
                     ]
                 , metaLines = MetaLines.defaults
+                , waterLines = WaterLines []
+                }
+
+            , t "Water amounts"
+                [ " "
+                , ":n=3,4,198"
+                , ":n=0,4,199"
+                ]
+                { blocks =
+                    [ [NoBlock]
+                    ]
+                , rabbits = []
+                , things = []
+                , metaLines = MetaLines.defaults
+                , waterLines = WaterLines [":n=3,4,198", ":n=0,4,199"]
                 }
             ]

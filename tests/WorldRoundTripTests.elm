@@ -73,6 +73,15 @@ all =
                 ]
             )
 
+        , test "Water amounts"
+            ( roundTrips
+                [ "NNN"
+                , "NNN"
+                , ":n=0,1,15000"
+                , ":n=2,0,16000"
+                ]
+            )
+
         ]
 
 

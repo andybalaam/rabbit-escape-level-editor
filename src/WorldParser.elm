@@ -24,6 +24,7 @@ import MetaLines exposing
     )
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Rabbit, movedRabbit)
+import WaterLines exposing (WaterLines(..))
 import World exposing
     ( Block(..)
     , BlockMaterial(..)
@@ -57,6 +58,14 @@ type alias Items =
 type alias ItemsRow =
     { physicalRow : Int
     , items : List Items
+    }
+
+
+type alias LinesByType =
+    { grid : List Line
+    , star : List Line
+    , water : List Line
+    , meta : List Line
     }
 
 
@@ -395,14 +404,14 @@ parse comment textWorld =
         allLines : List String
         allLines = split textWorld
 
-        -- (grLines, stLines, metaLines) : (List Line, List Line, List Line)
-        (grLines, stLines, meLines) = separateLineTypes allLines
+        linesByType : LinesByType
+        linesByType = separateLineTypes allLines
 
         charItems : Result ParseErr (List (List CharItem))
-        charItems = parseGridLines grLines
+        charItems = parseGridLines linesByType.grid
 
         starLines : Result ParseErr (List StarLine)
-        starLines = makeStarLines stLines
+        starLines = makeStarLines linesByType.star
 
         rawItems : Result ParseErr (List (ItemsRow))
         rawItems = integrateStarLines charItems starLines
@@ -436,9 +445,18 @@ parse comment textWorld =
             |> Result.map List.concat          -- List Thing
 
         metaLines : Result ParseErr MetaLines
-        metaLines = makeMetaLines meLines
+        metaLines = makeMetaLines linesByType.meta
+
+        waterLines : Result ParseErr WaterLines
+        waterLines = makeWaterLines linesByType.water
     in
-        Result.map4 (makeWorld comment) grid rabbits things metaLines
+        Result.map5
+            (makeWorld comment)
+            grid
+            rabbits
+            things
+            metaLines
+            waterLines
 
 
 removeFirstIfEmpty : List String -> List String
@@ -468,6 +486,11 @@ isStarLine line =
     String.left 3 line.content == ":*="
 
 
+isWaterLine : Line -> Bool
+isWaterLine line =
+    String.left 3 line.content == ":n="
+
+
 isMetaLine : Line -> Bool
 isMetaLine line =
     String.left 1 line.content == ":"
@@ -482,14 +505,19 @@ toGridLines row lines =
             { gridRow = row, line = line } :: toGridLines (row + 1) tail
 
 
-separateLineTypes : List String -> (List Line, List Line, List Line)
+separateLineTypes : List String -> LinesByType
 separateLineTypes rawLines =
     let
         lines = List.indexedMap makeLine rawLines
         (stLines, otherLines) = List.partition isStarLine lines
-        (meLines, grLines) = List.partition isMetaLine otherLines
+        (wtLines, otherLines2) = List.partition isWaterLine otherLines
+        (meLines, grLines) = List.partition isMetaLine otherLines2
     in
-        (grLines, stLines, meLines)
+        { grid = grLines
+        , star = stLines
+        , water = wtLines
+        , meta = meLines
+        }
 
 
 makeStarLines : List Line -> Result ParseErr (List StarLine)
@@ -498,8 +526,13 @@ makeStarLines lines =
 
 
 makeMetaLines : List Line -> Result ParseErr MetaLines
-makeMetaLines lines =
-    List.foldr addMetaLine (Ok MetaLines.defaults) lines
+makeMetaLines metaLines =
+    List.foldr addMetaLine (Ok MetaLines.defaults) metaLines
+
+
+makeWaterLines : List Line -> Result ParseErr WaterLines
+makeWaterLines waterLines =
+    Ok (WaterLines (List.map .content waterLines))
 
 
 parseGridLines : List Line -> Result ParseErr (List (List CharItem))

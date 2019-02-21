@@ -41,8 +41,9 @@ test:
 	elm-test
 
 setup:
-	echo "Install Elm from https://guide.elm-lang.org/install.html"
-	echo "Then 'sudo npm install -g elm-test@0.19.0-beta8' or similar"
+	echo "sudo apt install nodejs npm"
+	echo "sudo npm install --unsafe-perm=true --global elm"
+	echo "sudo npm install --unsafe-perm=true --global elm-test"
 
 clean:
 	rm -rf www

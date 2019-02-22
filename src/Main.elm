@@ -5,6 +5,7 @@ import Json.Decode
 
 import Flags exposing (Flags)
 import FlagsDecoder exposing (flagsDecoder)
+import MetaDiff
 import MetaLines
 import Mode exposing (Mode(..))
 import Model exposing (Model, UiMode(..), UiState, ViewMode(..))
@@ -56,7 +57,7 @@ initModelRecord flags world mode =
         { mode = mode
         , viewMode = Normal
         , item = Nothing
-        , newMetaLines = MetaLines.emptyDiff
+        , newMetaLines = MetaDiff.emptyDiff
         , newWorld = Nothing
         }
     , t = translationPlaceholder

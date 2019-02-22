@@ -4,6 +4,7 @@ module Update exposing (update)
 import Json.Encode as E
 
 
+import MetaDiff
 import MetaLines exposing (MetaLines)
 import Model exposing (Item(..), Model, UiMode(..), ViewMode(..))
 import Msg exposing (Msg(..))
@@ -181,7 +182,7 @@ updateDetailsInput model name value =
         { model
         | uiState =
             { uiState
-            | newMetaLines = MetaLines.setDiff name value uiState.newMetaLines
+            | newMetaLines = MetaDiff.setDiff name value uiState.newMetaLines
             }
         }
 
@@ -200,14 +201,14 @@ updateChangeDetails model =
                     Ok
                         { w
                         | metaLines =
-                            MetaLines.applyDiff
+                            MetaDiff.applyDiff
                                 uiState.newMetaLines
                                 w.metaLines
                         }
                 , uiState =
                     { uiState
                     | mode = InitialMode
-                    , newMetaLines = MetaLines.emptyDiff
+                    , newMetaLines = MetaDiff.emptyDiff
                     }
                 }
 
@@ -343,7 +344,7 @@ updateChangeMode model mode =
         newMetaLines =
             case mode of
                 ModifyDetailsMode ->
-                    MetaLines.emptyDiff
+                    MetaDiff.emptyDiff
                 _ ->
                     uiState.newMetaLines
         newWorld =

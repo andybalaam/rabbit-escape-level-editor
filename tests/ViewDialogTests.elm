@@ -10,6 +10,7 @@ import Expect
 import Dict exposing (Dict)
 import Html exposing (Html, div)
 import Html.Attributes exposing (for, type_, value)
+import MetaDiff
 import MetaLines
 import Msg exposing (Msg)
 import ViewDialog exposing (allMetaLineBoxes)
@@ -20,7 +21,7 @@ all =
     describe "Tests of the dialog view"
         [ t "All defaults values are displayed"
             MetaLines.defaults
-            MetaLines.emptyDiff
+            MetaDiff.emptyDiff
             [ check_label "name"
             , check_input "name" ""
             , check_label "description"
@@ -79,7 +80,7 @@ all =
 
 --        , t "Multiple hints make multiple boxes"
 --            (hintsOnly ["hint 1", "hint 2"])
---            MetaLines.emptyDiff
+--            MetaDiff.emptyDiff
 --            [ check_label "hint.1"
 --            , check_input "hint.1" "hint 1"
 --            , check_label "hint.2"
@@ -113,9 +114,9 @@ all =
 --     Dict.fromList [ ("hint", MetaLines.MvList hints) ]
 --
 --
--- hintsDiff : String -> String -> MetaLines.Diff
+-- hintsDiff : String -> String -> MetaDiff.Diff
 -- hintsDiff name value =
---     MetaLines.setDiff name value MetaLines.emptyDiff
+--     MetaDiff.setDiff name value MetaDiff.emptyDiff
 
 
 wrap_in_div : List (Html Msg) -> Query.Single Msg
@@ -145,7 +146,7 @@ check_input name val boxes =
 
 t : String
   -> MetaLines.MetaLines
-  -> MetaLines.Diff
+  -> MetaDiff.Diff
   -> List (Query.Single Msg -> () -> Expect.Expectation)
   -> Test
 t name starting_lines diff_to_apply expectations =

@@ -7,6 +7,7 @@ import Expect
 
 
 import Flags exposing (Flags)
+import MetaDiff
 import MetaLines
 import Mode exposing (Mode(..))
 import Model exposing (Item(..), Model, UiMode(..), UiState, ViewMode(..))
@@ -923,6 +924,6 @@ emptyState =
     { mode = InitialMode
     , viewMode = Normal
     , item = Nothing
-    , newMetaLines = MetaLines.emptyDiff
+    , newMetaLines = MetaDiff.emptyDiff
     , newWorld = Nothing
     }

@@ -19,6 +19,7 @@ import Html.Events exposing (onClick, onInput)
 
 import BlockImage exposing (blockImage)
 import ImagePath exposing (imagePath)
+import MetaDiff
 import MetaLines exposing (MetaValue(..))
 import Model exposing (Item(..), Model, UiMode(..), UiState)
 import Msg exposing (Msg(..))
@@ -189,7 +190,7 @@ codeTextContents model code canUpdate parseError =
 
 
 metaLineBoxes
-    : MetaLines.Diff
+    : MetaDiff.Diff
     -> (String, String)
     -> List (Html Msg)
 metaLineBoxes diff (name, defVal) =
@@ -197,8 +198,8 @@ metaLineBoxes diff (name, defVal) =
         inpid : String
         inpid = "id" ++ name
 
-        diffVal : Maybe MetaLines.DiffValue
-        diffVal = MetaLines.getDiff name diff
+        diffVal : Maybe MetaDiff.DiffValue
+        diffVal = MetaDiff.getDiff name diff
 
         val : String
         val = Maybe.withDefault defVal (Maybe.map .raw diffVal)
@@ -226,7 +227,7 @@ metaLineBoxes diff (name, defVal) =
         ]
 
 
-allMetaLineBoxes : MetaLines.Diff -> MetaLines.MetaLines -> List (Html Msg)
+allMetaLineBoxes : MetaDiff.Diff -> MetaLines.MetaLines -> List (Html Msg)
 allMetaLineBoxes diff oldMetaLines =
     List.concatMap
         (metaLineBoxes diff)
@@ -237,7 +238,7 @@ modifyDetailsControls : Model -> World-> Contents
 modifyDetailsControls model world =
     let
         canUpdate : Bool
-        canUpdate = MetaLines.allOk model.uiState.newMetaLines
+        canUpdate = MetaDiff.allOk model.uiState.newMetaLines
 
         boxes : List (Html Msg)
         boxes = allMetaLineBoxes model.uiState.newMetaLines world.metaLines

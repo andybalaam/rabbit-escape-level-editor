@@ -2,6 +2,7 @@ module Model exposing (Item(..), Model, UiMode(..), UiState, ViewMode(..))
 
 
 import Flags exposing (Flags)
+import MetaDiff
 import MetaLines
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Rabbit)
@@ -33,7 +34,7 @@ type alias UiState =
     { mode : UiMode
     , viewMode : ViewMode
     , item : Maybe Item
-    , newMetaLines : MetaLines.Diff
+    , newMetaLines : MetaDiff.Diff
     , newWorld : Maybe (String, Result ParseErr World)
     }
 

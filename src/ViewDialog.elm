@@ -1,4 +1,4 @@
-module ViewDialog exposing (viewDialog)
+module ViewDialog exposing (allMetaLineBoxes, viewDialog)
 
 
 import Html exposing (Html, button, div, img, input, label, p, text, textarea)
@@ -226,17 +226,21 @@ metaLineBoxes diff (name, defVal) =
         ]
 
 
+allMetaLineBoxes : MetaLines.Diff -> MetaLines.MetaLines -> List (Html Msg)
+allMetaLineBoxes diff oldMetaLines =
+    List.concatMap
+        (metaLineBoxes diff)
+        (MetaLines.toStringList oldMetaLines)
+
+
 modifyDetailsControls : Model -> World-> Contents
 modifyDetailsControls model world =
     let
         canUpdate : Bool
         canUpdate = MetaLines.allOk model.uiState.newMetaLines
 
-        boxes : List (List (Html Msg))
-        boxes =
-            List.map
-                (metaLineBoxes model.uiState.newMetaLines)
-                (MetaLines.toStringList world.metaLines)
+        boxes : List (Html Msg)
+        boxes = allMetaLineBoxes model.uiState.newMetaLines world.metaLines
     in
         { visible =
             True
@@ -272,7 +276,7 @@ modifyDetailsControls model world =
                     [ text "Update" ]
                 ]
             ]
-            ++ List.concat boxes
+            ++ boxes
             )
         }
 

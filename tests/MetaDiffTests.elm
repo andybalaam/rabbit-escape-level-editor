@@ -18,7 +18,7 @@ all = Test.concat
 
     , eq "Convert diff to list"
         (toDiffList (setDiff "num_rabbits" "2" emptyDiff))
-        [("num_rabbits", {raw="2", parsed=Ok (MetaLines.MvInt 2)})]
+        [("num_rabbits", {raw="2", parsed=Ok (DvInt 2)})]
 
     , eq "Get a value from a diff"
         ( getDiff "num_rabbits"
@@ -28,7 +28,7 @@ all = Test.concat
                 (setDiff "num_to_save" "1" emptyDiff)
             )
         )
-        (Just {raw="2", parsed=Ok (MetaLines.MvInt 2)})
+        (Just {raw="2", parsed=Ok (DvInt 2)})
 
     , eq "Get a missing value from a diff"
         ( getDiff "num_rabbits"

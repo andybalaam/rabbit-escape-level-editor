@@ -26,6 +26,12 @@ all = Test.concat
         []
         (toNonDefaultStringList defaults)
 
+    , eq "List value is converted to numbered items"
+        [ ("name.1", "v1")
+        , ("name.2", "v2")
+        ]
+        ( toStringList (Dict.insert "name" (MvList ["v1", "v2"]) Dict.empty) )
+
     , eq "Changed values appear in non-default list"
         ( Ok
             [ ("name", "Lev !")

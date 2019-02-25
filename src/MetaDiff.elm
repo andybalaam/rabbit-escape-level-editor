@@ -56,6 +56,8 @@ setDiff name value diff =
                 Dict.insert name {raw=value, parsed=Ok (DvString value)} diff
             Just (MvInt _) ->
                 Dict.insert name {raw=value, parsed=parseInt name value} diff
+            Just (MvList _) ->
+                diff  -- TODO
             Nothing ->
                 Debug.log ("setDiff: unknown name: " ++ name) diff
 

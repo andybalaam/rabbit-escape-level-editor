@@ -16,6 +16,7 @@ import Dict exposing (Dict)
 type MetaValue =
       MvInt Int
     | MvString String
+    | MvList (List String)
 
 
 type alias MetaLines =
@@ -75,17 +76,17 @@ fromList values =
 listToStringList : List (String, MetaValue) -> List (String, String)
 listToStringList metaLines =
     let
-        mvToString : (String, MetaValue) -> (String, String)
+        mvToString : (String, MetaValue) -> List (String, String)
         mvToString (name, value) =
-            let
-                v =
-                    case value of
-                        MvInt i -> String.fromInt i
-                        MvString s -> s
-            in
-                (name, v)
+            case value of
+                MvInt i -> [(name, String.fromInt i)]
+                MvString s -> [(name, s)]
+                MvList ls ->
+                    List.indexedMap
+                        (\i s -> (name ++ "." ++ (String.fromInt (i + 1)), s))
+                        ls
     in
-        List.map mvToString metaLines
+        List.concatMap mvToString metaLines
 
 
 toStringList : MetaLines -> List (String, String)

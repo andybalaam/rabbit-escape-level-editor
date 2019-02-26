@@ -8,6 +8,7 @@ module MetaLines exposing
     , toNonDefaultStringList
     , toStringList
     , unwrap
+    , wrap
     )
 
 
@@ -124,11 +125,14 @@ ithKey keyRoot i0 =
     keyRoot ++ "." ++ (String.fromInt (i0 + 1))
 
 
---wrap : Unwrapped -> MetaLines
---wrap metaLines =
---    todo
---
---
+wrap : Unwrapped -> MetaLines
+wrap unwrapped =
+    Dict.empty
+    --unwrapped
+    --    |> Dict.toList
+    --    |> List.foldl
+
+
 unwrap : MetaLines -> Unwrapped
 unwrap metaLines =
     metaLines

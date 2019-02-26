@@ -46,9 +46,30 @@ all = Test.concat
     --        |> Result.map toStringList
     --    )
 
+    , eq "Wrapping empty list is empty metalines"
+        Dict.empty
+        ( wrap Dict.empty )
+
     , eq "Unwrapping empty metalines is empty list"
         Dict.empty
         ( unwrap Dict.empty )
+
+    --, eq "Wrapping normal values converts them simply"
+    --    ( Dict.fromList
+    --        [ ("a", MvInt 3)
+    --        , ("b", MvInt 4)
+    --        , ("c", MvString "v")
+    --        , ("d", MvString "w")
+    --        ]
+    --    )
+    --    ( Dict.fromList
+    --        [ ("a", SvInt 3)
+    --        , ("b", SvInt 4)
+    --        , ("c", SvString "v")
+    --        , ("d", SvString "w")
+    --        ]
+    --        |> wrap
+    --    )
 
     , eq "Unwrapping normal values converts them simply"
         ( Dict.fromList

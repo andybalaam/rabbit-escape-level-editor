@@ -2,10 +2,8 @@ module WorldTextRender exposing (render)
 
 
 import Item2Text exposing (StarContent(..), toText)
-import MetaLines exposing
-    ( MetaLines
-    , MetaValue(..)
-    )
+import MetaLines exposing (MetaLines)
+import MetaValue exposing (MetaValue(..))
 import WaterLines exposing (WaterLines(..))
 import World exposing (Block, Grid(..), World, blocks, rabbitsAt, thingsAt)
 

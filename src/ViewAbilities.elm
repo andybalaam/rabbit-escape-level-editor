@@ -11,7 +11,7 @@ import Html exposing
 import Html.Attributes exposing (disabled, id, src)
 
 import ImagePath exposing (imagePath)
-import MetaLines exposing (MetaValue(..))
+import MetaValue exposing (MetaValue(..))
 import Model exposing (Model)
 import Msg exposing (Msg)
 import World exposing (World)

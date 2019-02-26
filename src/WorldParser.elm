@@ -18,10 +18,8 @@ module WorldParser exposing
 import Regex
 
 
-import MetaLines exposing
-    ( MetaLines
-    , MetaValue(..)
-    )
+import MetaLines exposing (MetaLines)
+import MetaValue exposing (MetaValue(..))
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Rabbit, movedRabbit)
 import WaterLines exposing (WaterLines(..))

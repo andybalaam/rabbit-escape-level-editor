@@ -4,7 +4,8 @@ import Test exposing (describe,test,Test)
 import Expect
 
 
-import MetaLines exposing (MetaLines, MetaValue(..))
+import MetaLines exposing (MetaLines)
+import MetaValue exposing (MetaValue(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit, makeRabbot)
 import Thing exposing (Thing(..), WaterContents(..))
 import WaterLines exposing (WaterLines(..))

@@ -15,7 +15,8 @@ import Expect
 
 
 import Item2Text exposing (CharItem(..))
-import MetaLines exposing (MetaLines, MetaValue(..))
+import MetaLines exposing (MetaLines)
+import MetaValue exposing (MetaValue(..))
 import ParseErr exposing (ParseErr(..))
 import Rabbit exposing (Direction(..), Rabbit, makeRabbit)
 import Thing exposing (Thing(..), WaterContents(..))

@@ -7,6 +7,8 @@ import Expect
 
 
 import MetaLines exposing (..)
+import MetaValue exposing (MetaValue(..))
+import SimpleValue exposing (SimpleValue(..))
 
 
 all : Test
@@ -31,6 +33,39 @@ all = Test.concat
         , ("name.2", "v2")
         ]
         ( toStringList (Dict.insert "name" (MvList ["v1", "v2"]) Dict.empty) )
+
+    --, eq "Change existing list item"
+    --    ( Ok
+    --        [ ("name.1", "v1")
+    --        , ("name.2", "changed")
+    --        ]
+    --    )
+    --    ( Dict.empty
+    --        |> Dict.insert "name" (MvList ["v1", "v2"])
+    --        |> parseAndSet "name.2" "changed"
+    --        |> Result.map toStringList
+    --    )
+
+    , eq "Unwrapping empty metalines is empty list"
+        Dict.empty
+        ( unwrap Dict.empty )
+
+    , eq "Unwrapping normal values converts them simply"
+        ( Dict.fromList
+            [ ("a", SvInt 3)
+            , ("b", SvInt 4)
+            , ("c", SvString "v")
+            , ("d", SvString "w")
+            ]
+        )
+        ( Dict.fromList
+            [ ("a", MvInt 3)
+            , ("b", MvInt 4)
+            , ("c", MvString "v")
+            , ("d", MvString "w")
+            ]
+            |> unwrap
+        )
 
     , eq "Changed values appear in non-default list"
         ( Ok

@@ -20,7 +20,8 @@ import Html.Events exposing (onClick, onInput)
 import BlockImage exposing (blockImage)
 import ImagePath exposing (imagePath)
 import MetaDiff
-import MetaLines exposing (MetaValue(..))
+import MetaLines
+import MetaValue exposing (MetaValue(..))
 import Model exposing (Item(..), Model, UiMode(..), UiState)
 import Msg exposing (Msg(..))
 import World exposing (Block(..), BlockMaterial(..), BlockShape(..), World)

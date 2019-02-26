@@ -1,22 +1,19 @@
 module MetaLines exposing
     ( MetaLines
-    , MetaValue(..)
     , SetFailed(..)
+    , Unwrapped
     , defaults
     , fromList
     , parseAndSet
     , toNonDefaultStringList
     , toStringList
+    , unwrap
     )
 
 
 import Dict exposing (Dict)
-
-
-type MetaValue =
-      MvInt Int
-    | MvString String
-    | MvList (List String)
+import MetaValue exposing (MetaValue(..))
+import SimpleValue exposing (SimpleValue(..))
 
 
 type alias MetaLines =
@@ -123,6 +120,29 @@ type SetFailed =
     | BadValue String String
 
 
+type alias Unwrapped =
+    Dict String SimpleValue
+
+
+--wrap : Unwrapped -> MetaLines
+--wrap metaLines =
+--    todo
+--
+--
+unwrap : MetaLines -> Unwrapped
+unwrap metaLines =
+    metaLines
+        |> Dict.toList
+        |> List.concatMap
+            ( \(k, v) ->
+                case v of
+                    MvInt i -> [(k, SvInt i)]
+                    MvString s -> [(k, SvString s)]
+                    MvList ls -> [(k, SvString "TODO")]
+            )
+        |> Dict.fromList
+
+
 parseAndSet : String -> String -> MetaLines -> Result SetFailed MetaLines
 parseAndSet name value metaLines =
     let
@@ -143,3 +163,11 @@ parseAndSet name value metaLines =
                 setString name value metaLines
             _ ->
                 Err (UnknownName name)
+--        Result.map wrap <|
+--            case Dict.get name (unwrap metaLines) of
+--                Just (MvInt _) ->
+--                    setInt name value metaLines
+--                Just (MvString _) ->
+--                    setString name value metaLines
+--                _ ->
+--                    Err (UnknownName name)

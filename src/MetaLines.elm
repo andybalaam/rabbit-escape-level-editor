@@ -115,13 +115,13 @@ toNonDefaultStringList metaLines =
         listToStringList (Dict.toList (Dict.filter nonDefault metaLines))
 
 
-type SetFailed =
-      UnknownName String
-    | BadValue String String
-
-
 type alias Unwrapped =
     Dict String SimpleValue
+
+
+ithKey : String -> Int -> String
+ithKey keyRoot i0 =
+    keyRoot ++ "." ++ (String.fromInt (i0 + 1))
 
 
 --wrap : Unwrapped -> MetaLines
@@ -138,9 +138,17 @@ unwrap metaLines =
                 case v of
                     MvInt i -> [(k, SvInt i)]
                     MvString s -> [(k, SvString s)]
-                    MvList ls -> [(k, SvString "TODO")]
+                    MvList ls ->
+                        List.indexedMap
+                            (\i lv -> (ithKey k i, SvString lv))
+                            ls
             )
         |> Dict.fromList
+
+
+type SetFailed =
+      UnknownName String
+    | BadValue String String
 
 
 parseAndSet : String -> String -> MetaLines -> Result SetFailed MetaLines

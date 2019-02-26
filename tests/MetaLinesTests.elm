@@ -67,6 +67,17 @@ all = Test.concat
             |> unwrap
         )
 
+    --, eq "Unwrapping list values indexes keys"
+    --    ( Dict.fromList
+    --        , ("k.1", SvString "v")
+    --        , ("k.2", SvString "w")
+    --        ]
+    --    )
+    --    ( Dict.fromList
+    --        [ ("k", MvList ["v", "w"])
+    --        ]
+    --        |> unwrap
+
     , eq "Changed values appear in non-default list"
         ( Ok
             [ ("name", "Lev !")

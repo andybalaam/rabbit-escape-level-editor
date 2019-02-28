@@ -30,18 +30,10 @@ defaultList =
     , ("description", MvString "")
     , ("author_name", MvString "")
     , ("author_url", MvString "")
-    , ("hint.1", MvString "")
-    , ("hint.2", MvString "") -- TODO: expandable lists?
-    , ("hint.3", MvString "")
-    , ("hint.1.code", MvString "")
-    , ("hint.2.code", MvString "")
-    , ("hint.3.code", MvString "")
-    , ("solution.1", MvString "")
-    , ("solution.2", MvString "")
-    , ("solution.3", MvString "")
-    , ("solution.1.code", MvString "")
-    , ("solution.2.code", MvString "")
-    , ("solution.3.code", MvString "")
+    , ("hint", MvList ["", "", ""])
+    , ("hint.code", MvList ["", "", ""])
+    , ("solution", MvList ["", "", ""])
+    , ("solution.code", MvList ["", "", ""])
     , ("num_rabbits", MvInt 10)
     , ("num_to_save", MvInt 1)
     , ("rabbit_delay", MvString "4") -- TODO: list of ints
@@ -74,39 +66,41 @@ fromList values =
         List.foldl checkedSet defaults values
 
 
-listToStringList : List (String, MetaValue) -> List (String, String)
-listToStringList metaLines =
-    let
-        mvToString : (String, MetaValue) -> List (String, String)
-        mvToString (name, value) =
-            case value of
-                MvInt i -> [(name, String.fromInt i)]
-                MvString s -> [(name, s)]
-                MvList ls ->
-                    List.indexedMap
-                        (\i s -> (name ++ "." ++ (String.fromInt (i + 1)), s))
-                        ls
-    in
-        List.concatMap mvToString metaLines
-
-
 toStringList : MetaLines -> List (String, String)
 toStringList metaLines =
     let
-        inOrder
-            : List (String, MetaValue)
-            -> MetaLines
-            -> List (String, MetaValue)
-        inOrder orderList mLs =
-            case orderList of
-                (name, _) :: ts ->
-                    case Dict.get name mLs of
-                        Just v -> (name, v) :: inOrder ts mLs
-                        Nothing -> inOrder ts mLs
+        find : Int -> String -> List String -> Int
+        find i item list =
+            case list of
+                h :: t ->
+                    if h == item then i else find (i+1) item t
                 _ ->
-                    []
+                    -1
+
+        orderOf
+            : List String
+            -> (String, SimpleValue)
+            -> (String, SimpleValue)
+            -> Order
+        orderOf base (a, _) (b, _) =
+            let
+                ia = find 0 (upToDot a) base
+                ib = find 0 (upToDot b) base
+            in
+                compare ia ib
+
+        simpleValueToString : SimpleValue -> String
+        simpleValueToString value =
+            case value of
+                SvInt i -> String.fromInt i
+                SvString s -> s
+
     in
-        listToStringList (inOrder defaultList metaLines)
+        metaLines
+            |> unwrap
+            |> Dict.toList
+            |> List.sortWith (orderOf (List.map Tuple.first defaultList))
+            |> List.map (\(k, v) -> (k, simpleValueToString v))
 
 
 toNonDefaultStringList : MetaLines -> List (String, String)
@@ -116,7 +110,9 @@ toNonDefaultStringList metaLines =
         nonDefault name value =
             Dict.get name defaults /= Just value
     in
-        listToStringList (Dict.toList (Dict.filter nonDefault metaLines))
+        metaLines
+            |> Dict.filter nonDefault
+            |> toStringList
 
 
 type alias Unwrapped =
@@ -234,48 +230,29 @@ type SetFailed =
       UnknownName String
     | BadValue String String
 
+
 parseAndSet : String -> String -> MetaLines -> Result SetFailed MetaLines
 parseAndSet name value metaLines =
     let
-        setInt : String -> String -> MetaLines -> Result SetFailed MetaLines
+        setInt : String -> String -> Unwrapped -> Result SetFailed Unwrapped
         setInt n v mLs =
             case String.toInt value of
-                Just i -> Ok (Dict.insert n (MvInt i) mLs)
+                Just i -> Ok (Dict.insert n (SvInt i) mLs)
                 Nothing -> Err (BadValue n v)
 
-        setString : String -> String -> MetaLines -> Result SetFailed MetaLines
+        setString : String -> String -> Unwrapped -> Result SetFailed Unwrapped
         setString n v mLs =
-            Ok (Dict.insert n (MvString v) mLs)
+            Ok (Dict.insert n (SvString v) mLs)
+
+        unwrapped : Unwrapped
+        unwrapped =
+            unwrap metaLines
     in
-        case Dict.get name metaLines of
-            Just (MvInt _) ->
-                setInt name value metaLines
-            Just (MvString _) ->
-                setString name value metaLines
-            _ ->
-                Err (UnknownName name)
---parseAndSet : String -> String -> MetaLines -> Result SetFailed MetaLines
---parseAndSet name value metaLines =
---    let
---        setInt : String -> String -> Unwrapped -> Result SetFailed Unwrapped
---        setInt n v mLs =
---            case String.toInt value of
---                Just i -> Ok (Dict.insert n (SvInt i) mLs)
---                Nothing -> Err (BadValue n v)
---
---        setString : String -> String -> Unwrapped -> Result SetFailed Unwrapped
---        setString n v mLs =
---            Ok (Dict.insert n (SvString v) mLs)
---
---        unwrapped : Unwrapped
---        unwrapped =
---            unwrap metaLines
---    in
---        Result.map wrap <|
---            case Dict.get name unwrapped of
---                Just (SvInt _) ->
---                    setInt name value unwrapped
---                Just (SvString _) ->
---                    setString name value unwrapped
---                _ ->
---                    Err (UnknownName name)
+        Result.map wrap <|
+            case Dict.get name unwrapped of
+                Just (SvInt _) ->
+                    setInt name value unwrapped
+                Just (SvString _) ->
+                    setString name value unwrapped
+                _ ->
+                    Err (UnknownName name)

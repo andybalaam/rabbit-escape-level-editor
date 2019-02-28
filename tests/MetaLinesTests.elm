@@ -58,16 +58,16 @@ all = Test.concat
         ]
         ( toStringList (Dict.insert "name" (MvList ["v1", "v2"]) Dict.empty) )
 
-    --, eq "Change existing list item"
-    --    ( Ok
-    --        [ ("name.1", "v1")
-    --        , ("name.2", "changed")
-    --        ]
-    --    )
-    --    ( Dict.fromList [("name", (MvList ["v1", "v2"]))]
-    --        |> parseAndSet "name.2" "changed"
-    --        |> Result.map toStringList
-    --    )
+    , eq "Change existing list item"
+        ( Ok
+            [ ("name.1", "v1")
+            , ("name.2", "changed")
+            ]
+        )
+        ( Dict.fromList [("name", (MvList ["v1", "v2"]))]
+            |> parseAndSet "name.2" "changed"
+            |> Result.map toStringList
+        )
 
     , eq "Wrapping empty list is empty metalines"
         Dict.empty

@@ -64,7 +64,7 @@ all = Test.concat
     --        , ("name.2", "changed")
     --        ]
     --    )
-    --    ( Dict.fromList [("name" (MvList ["v1", "v2"]))]
+    --    ( Dict.fromList [("name", (MvList ["v1", "v2"]))]
     --        |> parseAndSet "name.2" "changed"
     --        |> Result.map toStringList
     --    )
@@ -115,12 +115,15 @@ all = Test.concat
         ( Dict.fromList
             [ ("k", MvList ["", "v", "", "w"])
             , ("yy", MvList ["11"])
+            , ("yy.code", MvList ["**", "", "!!"])
             ]
         )
         ( Dict.fromList
             [ ("k.2", SvString "v")
             , ("k.4", SvString "w")
             , ("yy.1", SvString "11")
+            , ("yy.3.code", SvString "!!")
+            , ("yy.1.code", SvString "**")
             ]
             |> wrap
         )
@@ -130,11 +133,15 @@ all = Test.concat
             [ ("k.1", SvString "v")
             , ("k.2", SvString "w")
             , ("y.1", SvString "11")
+            , ("yy.1.code", SvString "**")
+            , ("yy.2.code", SvString "")
+            , ("yy.3.code", SvString "!!")
             ]
         )
         ( Dict.fromList
             [ ("k", MvList ["v", "w"])
             , ("x", MvList [])
+            , ("yy.code", MvList ["**", "", "!!"])
             , ("y", MvList ["11"])
             ]
             |> unwrap

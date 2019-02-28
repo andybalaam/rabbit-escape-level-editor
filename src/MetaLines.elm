@@ -124,8 +124,13 @@ type alias Unwrapped =
 
 
 ithKey : String -> Int -> String
-ithKey keyRoot i0 =
-    keyRoot ++ "." ++ (String.fromInt (i0 + 1))
+ithKey keyWithoutNum i0 =
+    let
+        root = upToDot keyWithoutNum
+        num = String.fromInt (i0 + 1)
+        rest = List.drop 1 (String.split "." keyWithoutNum)
+    in
+        String.join "." (root :: num :: rest)
 
 
 upToDot : String -> String
@@ -143,11 +148,12 @@ betweenFirst2Dots fullName =
         Maybe.withDefault ""
 
 
---fromSecondDot : String -> String
---fromSecondDot fullName =
---    String.split "." fullName |>
---        List.drop 2 |>
---        String.join "."
+fromSecondDot : String -> String
+fromSecondDot fullName =
+    String.split "." fullName |>
+        List.drop 2 |>
+        String.join "."
+
 
 mergeIntoList : Int -> SimpleValue -> Maybe MetaValue -> Maybe MetaValue
 mergeIntoList i0 new_value old_value =
@@ -183,6 +189,13 @@ updateMetaValue list_index1 new_value old_value =
             mergeIntoList (i1 - 1) new_value old_value
 
 
+withoutNumPart : String -> String
+withoutNumPart key =
+    case fromSecondDot key of
+        "" -> upToDot key
+        x -> upToDot key ++ "." ++ x
+
+
 insertByKey : String -> SimpleValue -> MetaLines -> MetaLines
 insertByKey key value metaValues =
     let
@@ -190,7 +203,7 @@ insertByKey key value metaValues =
         kNum = String.toInt (betweenFirst2Dots key)
     in
         Dict.update
-            (upToDot key)
+            (withoutNumPart key)
             (updateMetaValue kNum value)
             metaValues
 
@@ -221,7 +234,6 @@ type SetFailed =
       UnknownName String
     | BadValue String String
 
-
 parseAndSet : String -> String -> MetaLines -> Result SetFailed MetaLines
 parseAndSet name value metaLines =
     let
@@ -242,11 +254,28 @@ parseAndSet name value metaLines =
                 setString name value metaLines
             _ ->
                 Err (UnknownName name)
+--parseAndSet : String -> String -> MetaLines -> Result SetFailed MetaLines
+--parseAndSet name value metaLines =
+--    let
+--        setInt : String -> String -> Unwrapped -> Result SetFailed Unwrapped
+--        setInt n v mLs =
+--            case String.toInt value of
+--                Just i -> Ok (Dict.insert n (SvInt i) mLs)
+--                Nothing -> Err (BadValue n v)
+--
+--        setString : String -> String -> Unwrapped -> Result SetFailed Unwrapped
+--        setString n v mLs =
+--            Ok (Dict.insert n (SvString v) mLs)
+--
+--        unwrapped : Unwrapped
+--        unwrapped =
+--            unwrap metaLines
+--    in
 --        Result.map wrap <|
---            case Dict.get name (unwrap metaLines) of
---                Just (MvInt _) ->
---                    setInt name value metaLines
---                Just (MvString _) ->
---                    setString name value metaLines
+--            case Dict.get name unwrapped of
+--                Just (SvInt _) ->
+--                    setInt name value unwrapped
+--                Just (SvString _) ->
+--                    setString name value unwrapped
 --                _ ->
 --                    Err (UnknownName name)

@@ -1,10 +1,10 @@
-module ListSetTests exposing (all)
+module ListXtTests exposing (all)
 
 import Test exposing (test, Test)
 import Expect
 
 
-import ListSet exposing (..)
+import ListXt exposing (..)
 
 
 all : Test

@@ -15,7 +15,7 @@ module MetaLines exposing
 
 
 import Dict exposing (Dict)
-import ListSet exposing (listSet)
+import ListXt
 import MetaValue exposing (MetaValue(..))
 import SimpleValue exposing (SimpleValue(..), simpleToMetaValue)
 
@@ -167,7 +167,7 @@ mergeIntoList i0 new_value old_value =
                 SvString s -> s
                 _ -> "Error: non-string in list!"
     in
-        Just <| MvList <| listSet i0 new_string old_list
+        Just <| MvList <| ListXt.listSet i0 new_string old_list
 
 
 updateMetaValue

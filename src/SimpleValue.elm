@@ -1,4 +1,8 @@
-module SimpleValue exposing (SimpleValue(..), simpleToMetaValue)
+module SimpleValue exposing
+    ( SimpleValue(..)
+    , simpleToMetaValue
+    , simpleValueToString
+    )
 
 import MetaValue exposing (MetaValue(..))
 
@@ -14,9 +18,8 @@ simpleToMetaValue diffValue =
         SvString s -> MvString s
 
 
--- metaValueToSimpleValues : MetaValue -> List SimpleValue
--- metaValueToSimpleValues metaValue =
---     case metaValue of
---         MvInt i -> [SvInt i]
---         MvString s -> [SvString s]
---         MvList ls -> List.map SvString ls
+simpleValueToString : SimpleValue -> String
+simpleValueToString value =
+    case value of
+        SvInt i -> String.fromInt i
+        SvString s -> s

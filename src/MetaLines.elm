@@ -17,7 +17,11 @@ module MetaLines exposing
 import Dict exposing (Dict)
 import ListXt
 import MetaValue exposing (MetaValue(..))
-import SimpleValue exposing (SimpleValue(..), simpleToMetaValue)
+import SimpleValue exposing
+    ( SimpleValue(..)
+    , simpleToMetaValue
+    , simpleValueToString
+    )
 
 
 type alias MetaLines =
@@ -80,12 +84,6 @@ toStringList metaLines =
                 ib = ListXt.elemIndex (upToDot b) base
             in
                 Maybe.map2 compare ia ib |> Maybe.withDefault EQ
-
-        simpleValueToString : SimpleValue -> String
-        simpleValueToString value =
-            case value of
-                SvInt i -> String.fromInt i
-                SvString s -> s
 
     in
         metaLines

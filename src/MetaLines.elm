@@ -69,14 +69,6 @@ fromList values =
 toStringList : MetaLines -> List (String, String)
 toStringList metaLines =
     let
-        find : Int -> String -> List String -> Maybe Int
-        find i item list =
-            case list of
-                h :: t ->
-                    if h == item then Just i else find (i+1) item t
-                _ ->
-                    Nothing
-
         orderOf
             : List String
             -> (String, SimpleValue)
@@ -84,8 +76,8 @@ toStringList metaLines =
             -> Order
         orderOf base (a, _) (b, _) =
             let
-                ia = find 0 (upToDot a) base
-                ib = find 0 (upToDot b) base
+                ia = ListXt.elemIndex (upToDot a) base
+                ib = ListXt.elemIndex (upToDot b) base
             in
                 Maybe.map2 compare ia ib |> Maybe.withDefault EQ
 

@@ -48,6 +48,30 @@ all = Test.concat
     , eq "Setting at beginning and end overwrites"
         ["B", "1", "2", "E"]
         (set 3 "E" (set 0 "B" ["0", "1", "2", "3"]))
+
+    , eq "Finding in an empty list is Nothing"
+        Nothing
+        (elemIndex "2" [])
+
+    , eq "Finding non-present item is Nothing"
+        Nothing
+        (elemIndex "A" ["0", "1", "2", "3"])
+
+    , eq "Finding first item gives 0"
+        (Just 0)
+        (elemIndex "0" ["0", "1", "2", "3"])
+
+    , eq "Finding present item gives its index"
+        (Just 2)
+        (elemIndex "2" ["0", "1", "2", "3"])
+
+    , eq "Finding last item gives its index"
+        (Just 3)
+        (elemIndex "3" ["0", "1", "2", "3"])
+
+    , eq "Finding multiple item gives first index"
+        (Just 1)
+        (elemIndex "X" ["A", "X", "X", "A"])
     ]
 
 

@@ -2,19 +2,22 @@ module MetaLines exposing
     ( MetaLines
     , SetFailed(..)
     , Unwrapped
+    , betweenFirst2Dots
     , defaults
     , fromList
     , parseAndSet
     , toNonDefaultStringList
     , toStringList
     , unwrap
+    , upToDot
     , wrap
     )
 
 
 import Dict exposing (Dict)
+import ListSet exposing (listSet)
 import MetaValue exposing (MetaValue(..))
-import SimpleValue exposing (SimpleValue(..))
+import SimpleValue exposing (SimpleValue(..), simpleToMetaValue)
 
 
 type alias MetaLines =
@@ -125,12 +128,76 @@ ithKey keyRoot i0 =
     keyRoot ++ "." ++ (String.fromInt (i0 + 1))
 
 
+upToDot : String -> String
+upToDot fullName =
+    String.split "." fullName |>
+        List.head |>
+        Maybe.withDefault ""
+
+
+betweenFirst2Dots : String -> String
+betweenFirst2Dots fullName =
+    String.split "." fullName |>
+        List.drop 1 |>
+        List.head |>
+        Maybe.withDefault ""
+
+
+--fromSecondDot : String -> String
+--fromSecondDot fullName =
+--    String.split "." fullName |>
+--        List.drop 2 |>
+--        String.join "."
+
+mergeIntoList : Int -> SimpleValue -> Maybe MetaValue -> Maybe MetaValue
+mergeIntoList i0 new_value old_value =
+    let
+        old_list : List String
+        old_list =
+            case old_value of
+                Just (MvList ls) -> ls
+                _ -> []
+                -- anything that is missing or not a list becomes []
+
+        new_string : String
+        new_string =
+            case new_value of
+                SvString s -> s
+                _ -> "Error: non-string in list!"
+    in
+        Just <| MvList <| listSet i0 new_string old_list
+
+
+updateMetaValue
+    : Maybe Int -> SimpleValue -> Maybe MetaValue -> Maybe MetaValue
+updateMetaValue list_index1 new_value old_value =
+    case list_index1 of
+        Nothing ->
+            -- This did not come from a numbered key:
+            -- replace what was there.
+            Just (simpleToMetaValue new_value)
+
+        Just i1 ->
+            -- This came from a numbered key:
+            -- merge it into the existing list
+            mergeIntoList (i1 - 1) new_value old_value
+
+
+insertByKey : String -> SimpleValue -> MetaLines -> MetaLines
+insertByKey key value metaValues =
+    let
+        kNum : Maybe Int
+        kNum = String.toInt (betweenFirst2Dots key)
+    in
+        Dict.update
+            (upToDot key)
+            (updateMetaValue kNum value)
+            metaValues
+
+
 wrap : Unwrapped -> MetaLines
 wrap unwrapped =
-    Dict.empty
-    --unwrapped
-    --    |> Dict.toList
-    --    |> List.foldl
+    Dict.foldl insertByKey Dict.empty unwrapped
 
 
 unwrap : MetaLines -> Unwrapped

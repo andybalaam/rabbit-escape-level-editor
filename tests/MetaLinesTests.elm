@@ -24,6 +24,30 @@ all = Test.concat
             _ -> [("Failed to parse!", "")]
         )
 
+    , eq "Key without dot is equal to root key"
+        "my_key"
+        (upToDot "my_key")
+
+    , eq "Root of key with dot is everything before dot"
+        "key1x"
+        (upToDot "key1x.2")
+
+    , eq "Root of key with several dots is everything before first"
+        "foo"
+        (upToDot "foo.1.code")
+
+    , eq "Key without dot has no number"
+        ""
+        (betweenFirst2Dots "my_key")
+
+    , eq "Number of key with dot is after dot"
+        "2"
+        (betweenFirst2Dots "key1x.2")
+
+    , eq "Number of key with multiple dots is second part"
+        "20"
+        (betweenFirst2Dots "foo.20.xxx")
+
     , eq "Convert to list of non-defaults is empty for default"
         []
         (toNonDefaultStringList defaults)
@@ -40,8 +64,7 @@ all = Test.concat
     --        , ("name.2", "changed")
     --        ]
     --    )
-    --    ( Dict.empty
-    --        |> Dict.insert "name" (MvList ["v1", "v2"])
+    --    ( Dict.fromList [("name" (MvList ["v1", "v2"]))]
     --        |> parseAndSet "name.2" "changed"
     --        |> Result.map toStringList
     --    )
@@ -54,22 +77,22 @@ all = Test.concat
         Dict.empty
         ( unwrap Dict.empty )
 
-    --, eq "Wrapping normal values converts them simply"
-    --    ( Dict.fromList
-    --        [ ("a", MvInt 3)
-    --        , ("b", MvInt 4)
-    --        , ("c", MvString "v")
-    --        , ("d", MvString "w")
-    --        ]
-    --    )
-    --    ( Dict.fromList
-    --        [ ("a", SvInt 3)
-    --        , ("b", SvInt 4)
-    --        , ("c", SvString "v")
-    --        , ("d", SvString "w")
-    --        ]
-    --        |> wrap
-    --    )
+    , eq "Wrapping normal values converts them simply"
+        ( Dict.fromList
+            [ ("a", MvInt 3)
+            , ("b", MvInt 4)
+            , ("c", MvString "v")
+            , ("d", MvString "w")
+            ]
+        )
+        ( Dict.fromList
+            [ ("a", SvInt 3)
+            , ("b", SvInt 4)
+            , ("c", SvString "v")
+            , ("d", SvString "w")
+            ]
+            |> wrap
+        )
 
     , eq "Unwrapping normal values converts them simply"
         ( Dict.fromList
@@ -86,6 +109,20 @@ all = Test.concat
             , ("d", MvString "w")
             ]
             |> unwrap
+        )
+
+    , eq "Wrapping list values builds a list"
+        ( Dict.fromList
+            [ ("k", MvList ["", "v", "", "w"])
+            , ("yy", MvList ["11"])
+            ]
+        )
+        ( Dict.fromList
+            [ ("k.2", SvString "v")
+            , ("k.4", SvString "w")
+            , ("yy.1", SvString "11")
+            ]
+            |> wrap
         )
 
     , eq "Unwrapping list values indexes keys"

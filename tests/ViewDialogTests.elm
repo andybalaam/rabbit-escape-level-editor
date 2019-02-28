@@ -12,6 +12,7 @@ import Html exposing (Html, div)
 import Html.Attributes exposing (for, type_, value)
 import MetaDiff
 import MetaLines
+import MetaValue exposing(MetaValue(..))
 import Msg exposing (Msg)
 import ViewDialog exposing (allMetaLineBoxes)
 
@@ -78,45 +79,45 @@ all =
             , check_input "brolly" "0"
             ]
 
---        , t "Multiple hints make multiple boxes"
---            (hintsOnly ["hint 1", "hint 2"])
---            MetaDiff.emptyDiff
---            [ check_label "hint.1"
---            , check_input "hint.1" "hint 1"
---            , check_label "hint.2"
---            , check_input "hint.2" "hint 2"
---            ]
---
---        , t "A changed hint appears in its box"
---            (hintsOnly ["hint 1", "hint 2"])
---            (hintsDiff "hint.1" "changed 1")
---            [ check_label "hint.1"
---            , check_input "hint.1" "changed 1"
---            , check_label "hint.2"
---            , check_input "hint.2" "hint 2"
---            ]
---
---        , t "An added hint appears in its box"
---            (hintsOnly ["hint 1", "hint 2"])
---            (hintsDiff "hint.3" "new 3")
---            [ check_label "hint.1"
---            , check_input "hint.1" "hint 1"
---            , check_label "hint.2"
---            , check_input "hint.2" "hint 2"
---            , check_label "hint.3"
---            , check_input "hint.3" "new 3"
---            ]
+        , t "Multiple hints make multiple boxes"
+            (hintsOnly ["hint 1", "hint 2"])
+            MetaDiff.emptyDiff
+            [ check_label "hint.1"
+            , check_input "hint.1" "hint 1"
+            , check_label "hint.2"
+            , check_input "hint.2" "hint 2"
+            ]
+
+        , t "A changed hint appears in its box"
+            (hintsOnly ["hint 1", "hint 2"])
+            (hintsDiff "hint.1" "changed 1")
+            [ check_label "hint.1"
+            , check_input "hint.1" "changed 1"
+            , check_label "hint.2"
+            , check_input "hint.2" "hint 2"
+            ]
+
+        , t "An added hint appears in its box"
+            (hintsOnly ["hint 1", "hint 2"])
+            (hintsDiff "hint.3" "new 3")
+            [ check_label "hint.1"
+            , check_input "hint.1" "hint 1"
+            , check_label "hint.2"
+            , check_input "hint.2" "hint 2"
+            , check_label "hint.3"
+            , check_input "hint.3" "new 3"
+            ]
         ]
 
 
--- hintsOnly : List String -> MetaLines.MetaLines
--- hintsOnly hints =
---     Dict.fromList [ ("hint", MetaLines.MvList hints) ]
---
---
--- hintsDiff : String -> String -> MetaDiff.Diff
--- hintsDiff name value =
---     MetaDiff.setDiff name value MetaDiff.emptyDiff
+hintsOnly : List String -> MetaLines.MetaLines
+hintsOnly hints =
+    Dict.fromList [ ("hint", MvList hints) ]
+
+
+hintsDiff : String -> String -> MetaDiff.Diff
+hintsDiff name value =
+    MetaDiff.setDiff name value MetaDiff.emptyDiff
 
 
 wrap_in_div : List (Html Msg) -> Query.Single Msg

@@ -10,6 +10,7 @@ module MetaLines exposing
     , toStringList
     , unwrap
     , upToDot
+    , withoutNumPart
     , wrap
     )
 

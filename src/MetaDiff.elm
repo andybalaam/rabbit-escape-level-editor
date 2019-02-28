@@ -11,7 +11,7 @@ module MetaDiff exposing
 
 
 import Dict exposing (Dict)
-import MetaLines exposing (MetaLines, SetFailed(..))
+import MetaLines exposing (MetaLines, SetFailed(..), withoutNumPart)
 import MetaValue exposing (MetaValue(..))
 import SimpleValue exposing (SimpleValue(..), simpleToMetaValue)
 
@@ -34,21 +34,28 @@ emptyDiff =
 setDiff : String -> String -> Diff -> Diff
 setDiff name value diff =
     let
+        default : Maybe MetaValue
+        default =
+            Dict.get (withoutNumPart name) MetaLines.defaults
+
         parseInt : String -> String -> Result SetFailed SimpleValue
         parseInt n v =
             case String.toInt v of
                 Just i -> Ok (SvInt i)
                 Nothing -> Err (BadValue n v)
+
+        valueOfDefaultType : Result SetFailed SimpleValue
+        valueOfDefaultType =
+            case default of
+                Just (MvString _) -> Ok (SvString value)
+                Just (MvInt _) -> parseInt name value
+                Just (MvList _) -> Ok (SvString value)
+                Nothing ->
+                    Debug.log
+                        ("setDiff: unknown name: " ++ name)
+                        (Err (UnknownName name))
     in
-        case Dict.get name MetaLines.defaults of  -- Uses default, which feels bad?
-            Just (MvString _) ->
-                Dict.insert name {raw=value, parsed=Ok (SvString value)} diff
-            Just (MvInt _) ->
-                Dict.insert name {raw=value, parsed=parseInt name value} diff
-            Just (MvList _) ->
-                diff  -- TODO
-            Nothing ->
-                Debug.log ("setDiff: unknown name: " ++ name) diff
+        Dict.insert name {raw=value, parsed=valueOfDefaultType} diff
 
 
 getDiff : String -> Diff -> Maybe DiffValue

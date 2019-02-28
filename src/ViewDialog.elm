@@ -1,6 +1,7 @@
 module ViewDialog exposing (allMetaLineBoxes, viewDialog)
 
 
+import Dict
 import Html exposing (Html, button, div, img, input, label, p, text, textarea)
 import Html.Attributes exposing
     ( class
@@ -228,11 +229,22 @@ metaLineBoxes diff (name, defVal) =
         ]
 
 
+onlyInDiff : MetaDiff.Diff -> MetaLines.MetaLines -> List (String, String)
+onlyInDiff diff oldMetaLines =
+    let
+        unwrapped = MetaLines.unwrap oldMetaLines
+    in
+        diff
+            |> Dict.toList
+            |> List.filter (\(k, v) -> not (Dict.member k unwrapped))
+            |> List.map (\(k, v) -> (k, v.raw))
+
+
 allMetaLineBoxes : MetaDiff.Diff -> MetaLines.MetaLines -> List (Html Msg)
 allMetaLineBoxes diff oldMetaLines =
     List.concatMap
         (metaLineBoxes diff)
-        (MetaLines.toStringList oldMetaLines)
+        (MetaLines.toStringList oldMetaLines ++ onlyInDiff diff oldMetaLines)
 
 
 modifyDetailsControls : Model -> World-> Contents

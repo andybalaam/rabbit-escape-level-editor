@@ -1,18 +1,18 @@
-module ListXt exposing (listPadToLength, listSet)
+module ListXt exposing (padToLength, set)
 
 
-listPadToLength : Int -> List String -> List String
-listPadToLength i lst =
+padToLength : Int -> List String -> List String
+padToLength i lst =
     if i < 1 then
         lst
     else
         case lst of
-            h :: t -> h :: listPadToLength (i-1) t
-            [] -> "" :: listPadToLength (i-1) []
+            h :: t -> h :: padToLength (i-1) t
+            [] -> "" :: padToLength (i-1) []
 
 
-listSet : Int -> String -> List String -> List String
-listSet i v lst =
-    (listPadToLength i lst |> List.take i)
+set : Int -> String -> List String -> List String
+set i v lst =
+    (padToLength i lst |> List.take i)
     ++ [v]
     ++ (List.drop (i+1) lst)

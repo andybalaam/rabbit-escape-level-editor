@@ -167,7 +167,7 @@ mergeIntoList i0 new_value old_value =
                 SvString s -> s
                 _ -> "Error: non-string in list!"
     in
-        Just <| MvList <| ListXt.listSet i0 new_string old_list
+        Just <| MvList <| ListXt.set i0 new_string old_list
 
 
 updateMetaValue

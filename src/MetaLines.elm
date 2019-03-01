@@ -81,10 +81,18 @@ toStringList metaLines =
             -> Order
         orderOf base (a, _) (b, _) =
             let
-                ia = ListXt.elemIndex (upToDot a) base
-                ib = ListXt.elemIndex (upToDot b) base
+                idxInBase : String -> Int
+                idxInBase k =
+                    ListXt.elemIndex (upToDot k) base
+                        |> Maybe.withDefault -1
+
+                ia = idxInBase a
+                ib = idxInBase b
+
+                na = withoutNumPart a
+                nb = withoutNumPart b
             in
-                Maybe.map2 compare ia ib |> Maybe.withDefault EQ
+                compare (ia, na) (ib, nb)
 
     in
         metaLines

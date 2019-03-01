@@ -1,6 +1,7 @@
 - Support any number of hints and solutions
   + Mainly works
-  - .code properties don't seem to stick when updated in UI
+  + .code properties don't seem to stick when updated in UI
+  + code and normal lists are interleaved
   - Editing in code editor highlights solution.4 as an error
 
 # Edit in real game
@@ -11,11 +12,9 @@
 # Workflow for editing levels
 
 - Highlight error line/char in code window - use <code contenteditable=true
+- Understand coded lines.  Checkbox to show/save coded or not.
 
-# Level editor done
+# Online play
 
-- Save current work in a cookie or Local Storage
-- Save/load to/from the cloud and/or as a URL and/or as github issue
-- Log in and have a list of saved things
 - Play/test levels online
 - Provide solutions after playing

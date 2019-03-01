@@ -58,6 +58,20 @@ all = Test.concat
         ]
         ( toStringList (Dict.insert "name" (MvList ["v1", "v2"]) Dict.empty) )
 
+    , eq "Lists with different suffixes are separated"
+        [ ("name.1", "v1")
+        , ("name.2", "v2")
+        , ("name.1.code", "1V")
+        , ("name.2.code", "2V")
+        ]
+        (
+            [ ("name", MvList ["v1", "v2"])
+            , ("name.code", MvList ["1V", "2V"])
+            ]
+                |> Dict.fromList
+                |> toStringList
+        )
+
     , eq "Change existing list item"
         ( Ok
             [ ("name.1", "v1")

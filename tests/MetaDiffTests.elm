@@ -156,24 +156,6 @@ all = Test.concat
             )
         )
 
-    --, eq "Empty items at end of list are removed"
-    --    [ ("hint.1", "foo")
-    --    ]
-    --    ( MetaLines.toNonDefaultStringList
-    --        ( applyDiff
-    --            ( setDiff
-    --                "hint.3"
-    --                ""
-    --                ( setDiff
-    --                    "hint.2"
-    --                    ""
-    --                    (setDiff "hint.1" "foo" emptyDiff)
-    --                )
-    --            )
-    --            MetaLines.defaults
-    --        )
-    --    )
-
     , assert_contains "Applying valid and invalid values applies the valid"
         ("num_rabbits", "3")
         ( MetaLines.toStringList

@@ -11,7 +11,14 @@ module MetaDiff exposing
 
 
 import Dict exposing (Dict)
-import MetaLines exposing (MetaLines, SetFailed(..), withoutNumPart)
+import MetaLines exposing
+    ( MetaLines
+    , SetFailed(..)
+    , Unwrapped
+    , unwrap
+    , withoutNumPart
+    , wrap
+    )
 import MetaValue exposing (MetaValue(..))
 import SimpleValue exposing (SimpleValue(..), simpleToMetaValue)
 
@@ -72,13 +79,13 @@ toDiffList diff =
 applyDiff : Diff -> MetaLines -> MetaLines
 applyDiff diff metaLines =
     let
-        setValue : String -> DiffValue -> MetaLines -> MetaLines
-        setValue name diffValue mLs =
+        setValue : String -> DiffValue -> Unwrapped -> Unwrapped
+        setValue name diffValue unwrapped =
             case diffValue.parsed of
-                Ok v -> Dict.insert name (simpleToMetaValue v) mLs
-                Err _ -> mLs  -- Ignore errors
+                Ok v -> Dict.insert name v unwrapped
+                Err _ -> unwrapped  -- Ignore errors
     in
-        Dict.foldl setValue metaLines diff
+        wrap (Dict.foldl setValue (unwrap metaLines) diff)
 
 
 allOk : Diff -> Bool

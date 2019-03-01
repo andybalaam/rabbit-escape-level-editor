@@ -75,6 +75,105 @@ all = Test.concat
             )
         )
 
+    , eq "Lists can be built using diffs"
+        [ ("hint.1", "foo1")
+        , ("hint.2", "foo2")
+        , ("hint.3", "")
+        ]
+        ( MetaLines.toNonDefaultStringList
+            ( applyDiff
+                ( setDiff
+                    "hint.2"
+                    "foo2"
+                    (setDiff "hint.1" "foo1" emptyDiff)
+                )
+                MetaLines.defaults
+            )
+        )
+
+    , eq "Lists with gaps can be built using diffs"
+        [ ("hint.1", "")
+        , ("hint.2", "foo2")
+        , ("hint.3", "")
+        , ("hint.4", "")
+        , ("hint.5", "")
+        , ("hint.6", "foo6")
+        ]
+        ( MetaLines.toNonDefaultStringList
+            ( applyDiff
+                ( setDiff
+                    "hint.6"
+                    "foo6"
+                    (setDiff "hint.2" "foo2" emptyDiff)
+                )
+                MetaLines.defaults
+            )
+        )
+
+    , eq "List diff items can be overwritten in the same diff"
+        [ ("hint.1", "1")
+        , ("hint.2", "B")
+        , ("hint.3", "3")
+        , ("hint.4", "D")
+        ]
+        ( MetaLines.toNonDefaultStringList
+            ( applyDiff
+                ( emptyDiff |>
+                    setDiff "hint.1" "1" |>
+                    setDiff "hint.2" "2" |>
+                    setDiff "hint.3" "3" |>
+                    setDiff "hint.4" "4" |>
+                    setDiff "hint.2" "B" |>
+                    setDiff "hint.4" "D"
+                )
+                MetaLines.defaults
+            )
+        )
+
+    , eq "Lists items can be overwritten with a new diff"
+        [ ("hint.1", "1")
+        , ("hint.2", "B")
+        , ("hint.3", "3")
+        , ("hint.4", "D")
+        ]
+        ( MetaLines.toNonDefaultStringList
+            (
+                ( applyDiff
+                    ( emptyDiff |>
+                        setDiff "hint.1" "1" |>
+                        setDiff "hint.2" "2" |>
+                        setDiff "hint.3" "3" |>
+                        setDiff "hint.4" "4"
+                    )
+                    MetaLines.defaults
+                )
+                |> ( applyDiff
+                    ( emptyDiff |>
+                        setDiff "hint.2" "B" |>
+                        setDiff "hint.4" "D"
+                    )
+                )
+            )
+        )
+
+    --, eq "Empty items at end of list are removed"
+    --    [ ("hint.1", "foo")
+    --    ]
+    --    ( MetaLines.toNonDefaultStringList
+    --        ( applyDiff
+    --            ( setDiff
+    --                "hint.3"
+    --                ""
+    --                ( setDiff
+    --                    "hint.2"
+    --                    ""
+    --                    (setDiff "hint.1" "foo" emptyDiff)
+    --                )
+    --            )
+    --            MetaLines.defaults
+    --        )
+    --    )
+
     , assert_contains "Applying valid and invalid values applies the valid"
         ("num_rabbits", "3")
         ( MetaLines.toStringList

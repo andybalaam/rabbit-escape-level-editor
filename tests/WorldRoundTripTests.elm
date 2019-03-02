@@ -82,6 +82,17 @@ all =
                 ]
             )
 
+        , test "Meta lines"
+            ( roundTrips
+                [ " "
+                , ":name=My Level"
+                , ":solution.1=bash;(1,2)"
+                , ":solution.2=bash;(1,3)"
+                , ":solution.3=bash;(1,4)"
+                , ":solution.4=bash&(1,5);until:WON"
+                ]
+            )
+
         ]
 
 

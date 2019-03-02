@@ -1,8 +1,4 @@
-- Support any number of hints and solutions
-  + Mainly works
-  + .code properties don't seem to stick when updated in UI
-  + code and normal lists are interleaved
-  - Editing in code editor highlights solution.4 as an error
++ Support any number of hints and solutions
 
 # Edit in real game
 

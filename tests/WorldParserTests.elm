@@ -57,8 +57,11 @@ all =
         , test "Parse world with blocks" parseWorldWithBlocks
         , test "Parse world with rabbits" parseWorldWithRabbits
         , test "Parse world with things" parseWorldWithThings
+        , test "Parse world with many hints" parseWorldWithManyHints
+        , test "Parse world with gaps between hints" parseWorldWithHintsGaps
         , test "Parse bad world (long line)" parseBadWorldLongLine
         , test "Parse bad world (bad char)" parseBadWorldBadChar
+        , test "Parse bad world (unknown list)" parseBadWorldUnknownList
         , test "Parse overlapping rabbits" parseOverlappingRabbits
         , test "Parse multiple stars" parseMultipleStars
         ]
@@ -621,43 +624,111 @@ parseWorldWithThings =
         )
 
 
+parseWorldWithManyHints : () -> Expect.Expectation
+parseWorldWithManyHints =
+    okAndEqual
+        (parseLines
+            "tst"
+            [ ":hint.1=foo"
+            , ":hint.2=bar"
+            , ":hint.3=baz"
+            , ":hint.4=qux"
+            , "#"
+            ]
+        )
+        (makeWorld
+            "tst"
+            (makeBlockGrid
+                [ [fltErth]
+                ]
+            )
+            []
+            []
+            ( MetaLines.fromList
+                [ ( "hint", MvList ["foo", "bar", "baz", "qux"] )
+                ]
+            )
+            (WaterLines [])
+        )
+
+
+parseWorldWithHintsGaps : () -> Expect.Expectation
+parseWorldWithHintsGaps =
+    okAndEqual
+        (parseLines
+            "tst"
+            [ ":hint.1=foo"
+            , ":hint.4=qux"
+            , "#"
+            ]
+        )
+        (makeWorld
+            "tst"
+            (makeBlockGrid
+                [ [fltErth]
+                ]
+            )
+            []
+            []
+            ( MetaLines.fromList
+                [ ( "hint", MvList ["foo", "", "", "qux"] )
+                ]
+            )
+            (WaterLines [])
+        )
+
+
 parseBadWorldLongLine : () -> Expect.Expectation
 parseBadWorldLongLine =
     notOkAndEqual
-            ( parseLines
-                "tst"
-                [ ":name=foo"
-                , ":bash=1"
-                , ":block=2"
-                , ":brolly=1"
-                , "Q  j#"
-                , "   #"
-                , "rO  "
-                , "####"
-                ]
-            )
-            (  "Line 6, column 4: The lines of this level are different "
-            ++ "lengths - they must be all exactly the same length.  "
-            ++ "The first line was 5 characters long, but this one is 4."
-            )
+        ( parseLines
+            "tst"
+            [ ":name=foo"
+            , ":bash=1"
+            , ":block=2"
+            , ":brolly=1"
+            , "Q  j#"
+            , "   #"
+            , "rO  "
+            , "####"
+            ]
+        )
+        (  "Line 6, column 4: The lines of this level are different "
+        ++ "lengths - they must be all exactly the same length.  "
+        ++ "The first line was 5 characters long, but this one is 4."
+        )
 
 
 parseBadWorldBadChar : () -> Expect.Expectation
 parseBadWorldBadChar =
     notOkAndEqual
-            ( parseLines
-                "tst"
-                [ ":name=foo"
-                , ":bash=1"
-                , ":block=2"
-                , ":brolly=1"
-                , "Q  ~"
-                , "   #"
-                , "rO  "
-                , "####"
-                ]
-            )
-            "Line 5, column 4: Unrecognised character: '~'."
+        ( parseLines
+            "tst"
+            [ ":name=foo"
+            , ":bash=1"
+            , ":block=2"
+            , ":brolly=1"
+            , "Q  ~"
+            , "   #"
+            , "rO  "
+            , "####"
+            ]
+        )
+        "Line 5, column 4: Unrecognised character: '~'."
+
+
+parseBadWorldUnknownList : () -> Expect.Expectation
+parseBadWorldUnknownList =
+    notOkAndEqual
+        ( parseLines
+            "tst"
+            [ ":name.1=foo"
+            , " "
+            ]
+        )
+        ( "Line 1, column 1: Unknown meta property name 'name.1'." ++
+          "  (The value provided was 'foo')."
+        )
 
 
 parseOverlappingRabbits : () -> Expect.Expectation

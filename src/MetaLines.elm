@@ -253,5 +253,9 @@ parseAndSet name value metaLines =
                     setInt name value unwrapped
                 Just (SvString _) ->
                     setString name value unwrapped
-                _ ->
-                    Err (UnknownName name)
+                Nothing ->
+                    case Dict.get (upToDot name) defaults of
+                        Just (MvList _) ->
+                            setString name value unwrapped
+                        _ ->
+                            Err (UnknownName name)

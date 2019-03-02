@@ -134,11 +134,16 @@ all =
             ( MetaLines.fromList
                 [ ("num_rabbits", MvInt 4)
                 , ("num_to_save", MvInt 2)
+                , ("solution.code", MvList ["a", "b", "c", "d"])
                 ]
             )
             (WaterLines [])
             [ " "
             , "/"
+            , ":solution.1.code=a"
+            , ":solution.2.code=b"
+            , ":solution.3.code=c"
+            , ":solution.4.code=d"
             , ":num_rabbits=4"
             , ":num_to_save=2"
             ]
